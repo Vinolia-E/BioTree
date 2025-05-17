@@ -108,4 +108,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update chart preview with placeholder
     updateChartPreview();
   }
+
+  // Format file size
+  function formatFileSize(bytes) {
+    if (bytes < 1024) {
+      return bytes + ' bytes';
+    } else if (bytes < 1048576) {
+      return (bytes / 1024).toFixed(1) + ' KB';
+    } else {
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+  }
+
+  // Get file icon type
+  function getFileIconType(file) {
+    if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+      return 'pdf-icon';
+    } else if (
+      file.type ===
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      file.name.endsWith('.docx')
+    ) {
+      return 'docx-icon';
+    } else {
+      return 'txt-icon';
+    }
+  }
 });
