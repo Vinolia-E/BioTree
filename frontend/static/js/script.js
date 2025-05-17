@@ -134,4 +134,36 @@ document.addEventListener('DOMContentLoaded', () => {
       return 'txt-icon';
     }
   }
+
+  // Update chart preview based on selected chart type
+  function updateChartPreview() {
+    const selectedChart = document.querySelector(
+      'input[name="chart-type"]:checked'
+    ).value;
+
+    // This would generate an actual chart but we'll just show a placeholder message
+    chartPreview.innerHTML = `
+      <div class="chart-placeholder ${selectedChart}-placeholder">
+        <p>Preview of ${selectedChart} chart</p>
+        <p>This is where the ${selectedChart} chart will be rendered</p>
+      </div>
+    `;
+  }
+
+  // Listen for chart type changes
+  chartOptions.forEach((option) => {
+    option.addEventListener('change', updateChartPreview);
+  });
+
+  // Process button click handler
+  processBtn.addEventListener('click', () => {
+    const file = fileInput.files[0];
+    const chartType = document.querySelector(
+      'input[name="chart-type"]:checked'
+    ).value;
+
+    // This should send the file to the backend but we'll just show an alert
+    alert(`Processing ${file.name} with ${chartType} chart visualization.
+    In a real application, this would send the file to the backend for processing.`);
+  });
 });
