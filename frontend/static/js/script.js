@@ -73,4 +73,39 @@ document.addEventListener('DOMContentLoaded', () => {
       processBtn.disabled = true;
     }
   }
+
+  // Check if file type is valid
+  function validFileType(file) {
+    return (
+      fileTypes.includes(file.type) ||
+      file.name.endsWith('.pdf') ||
+      file.name.endsWith('.docx') ||
+      file.name.endsWith('.txt')
+    );
+  }
+
+  // Display file information
+  function displayFileInfo(file) {
+    // Format file size
+    const size = formatFileSize(file.size);
+
+    // Get file icon based on type
+    const iconType = getFileIconType(file);
+
+    filePreview.innerHTML = `
+      <div class="file-metadata">
+        <div class="file-icon ${iconType}"></div>
+        <div class="file-info">
+          <p><strong>File name:</strong> ${file.name}</p>
+          <p><strong>File size:</strong> ${size}</p>
+          <p><strong>Last modified:</strong> ${new Date(
+            file.lastModified
+          ).toLocaleDateString()}</p>
+        </div>
+      </div>
+    `;
+
+    // Update chart preview with placeholder
+    updateChartPreview();
+  }
 });
