@@ -59,12 +59,10 @@ func (lc *lineChart) Generate() string {
 		})
 	}
 
-	// Add grid if enabled
 	if lc.options.ShowGrid {
 		lc.addGrid(sb, chartWidth, chartHeight)
 	}
 
-	// Add axes
 	lc.addAxes(sb, chartWidth, chartHeight, yMin, yMax)
 
 	// Add axis labels if provided
@@ -97,7 +95,6 @@ func (lc *lineChart) Generate() string {
 		)
 	}
 
-	// Generate the line path
 	lc.addLinePath(sb, chartWidth, chartHeight, yMin, yMax)
 
 	return sb.String()
