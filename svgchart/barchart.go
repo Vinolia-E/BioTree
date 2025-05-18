@@ -60,12 +60,10 @@ func (bc *barChart) Generate() string {
 		})
 	}
 
-	// Add grid if enabled
 	if bc.options.ShowGrid {
 		bc.addGrid(sb, chartWidth, chartHeight)
 	}
 
-	// Add axes
 	bc.addAxes(sb, chartWidth, chartHeight, yMin, yMax)
 
 	// Add axis labels if provided
@@ -98,7 +96,6 @@ func (bc *barChart) Generate() string {
 		)
 	}
 
-	// Generate the bars
 	bc.addBars(sb, chartWidth, chartHeight, yMin, yMax)
 
 	return sb.String()
