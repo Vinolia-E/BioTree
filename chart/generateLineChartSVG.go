@@ -90,5 +90,13 @@ func GenerateLineChartSVG(data map[string]float64) string {
 		sb.WriteString(fmt.Sprintf(`<line x1="%d" y1="%.1f" x2="%d" y2="%.1f" stroke="%s" stroke-dasharray="2,2"/>`, padding, y, width-padding, y, gridColor))
 	}
 
-	return ""
+	// Line path
+	sb.WriteString(fmt.Sprintf(`<polyline fill="none" stroke="%s" stroke-width="2" points="`, lineColor))
+	for _, pt := range points {
+		sb.WriteString(fmt.Sprintf("%.1f,%.1f ", pt.X, pt.Y))
+	}
+	sb.WriteString(`"/>`)
+
+	sb.WriteString(`</svg>`)
+	return sb.String()
 }
