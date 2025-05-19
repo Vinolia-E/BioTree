@@ -36,5 +36,26 @@ func LineChartFromPairs(data []Point, xLabel, yLabel string) string {
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].X < data[j].X
 	})
-	return ""
+	
+	// Find min and max values
+	minX, maxX := data[0].X, data[0].X
+	minY, maxY := data[0].Y, data[0].Y
+	
+	for _, p := range data {
+		if p.X < minX {
+			minX = p.X
+		}
+		if p.X > maxX {
+			maxX = p.X
+		}
+		if p.Y < minY {
+			minY = p.Y
+		}
+		if p.Y > maxY {
+			maxY = p.Y
+		}
+	}
+	
+	
+	return GenerateSVG(data, minX, maxX, minY, maxY, xLabel, yLabel)
 }
