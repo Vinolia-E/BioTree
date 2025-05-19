@@ -81,5 +81,14 @@ func GenerateLineChartSVG(data map[string]float64) string {
 		sb.WriteString(fmt.Sprintf(`<text x="%.1f" y="%.1f" font-size="%d" text-anchor="middle">%s</text>`, x, y+fontSize+2, fontSize, k))
 	}
 
+	// Y-axis labels
+	steps := 5
+	for i := 0; i <= steps; i++ {
+		val := minY + (maxY-minY)*float64(i)/float64(steps)
+		y := float64(height-padding) - (val-minY)*scaleY
+		sb.WriteString(fmt.Sprintf(`<text x="%d" y="%.1f" font-size="%d" text-anchor="end">%.0f</text>`, padding-5, y+3, fontSize, val))
+		sb.WriteString(fmt.Sprintf(`<line x1="%d" y1="%.1f" x2="%d" y2="%.1f" stroke="%s" stroke-dasharray="2,2"/>`, padding, y, width-padding, y, gridColor))
+	}
+
 	return ""
 }
