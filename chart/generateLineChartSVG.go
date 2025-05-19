@@ -16,3 +16,8 @@ type Point struct {
 	X float64
 	Y float64
 }
+
+// GenerateLineChartSVG creates an SVG string for a line chart
+func GenerateLineChartSVG(data map[string]float64) string {
+	return ""
+}
