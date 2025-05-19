@@ -1,5 +1,7 @@
 package svgchart
 
+import "sort"
+
 // Chart dimensions and styling constants
 const (
 	Width           = 600
@@ -26,6 +28,13 @@ type Point struct {
 // LineChartFromPairs generates an SVG line chart from a slice of x,y pairs
 func LineChartFromPairs(data []Point, xLabel, yLabel string) string {
 	if len(data) == 0 {
-		return generateEmptyChart(xLabel, yLabel)
+		// return generateEmptyChart(xLabel, yLabel)
+		return ""
 	}
+
+	// Sort data by X value
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].X < data[j].X
+	})
+	return ""
 }
