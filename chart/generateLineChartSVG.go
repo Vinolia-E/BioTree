@@ -1,6 +1,9 @@
 package chart
 
-import "sort"
+import (
+	"math"
+	"sort"
+)
 
 const (
 	width     = 400
@@ -31,6 +34,21 @@ func GenerateLineChartSVG(data map[string]float64) string {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
+
+	// Compute min/max for scaling
+	minY, maxY := math.Inf(1), math.Inf(-1)
+	for _, v := range data {
+		if v < minY {
+			minY = v
+		}
+		if v > maxY {
+			maxY = v
+		}
+	}
+	if minY == maxY {
+		minY -= 1
+		maxY += 1
+	}
 
 	return ""
 }
