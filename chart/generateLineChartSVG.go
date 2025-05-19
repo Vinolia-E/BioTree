@@ -50,5 +50,18 @@ func GenerateLineChartSVG(data map[string]float64) string {
 		maxY += 1
 	}
 
+
+	scaleX := float64(width-2*padding) / float64(len(keys)-1)
+	scaleY := float64(height-2*padding) / (maxY - minY)
+
+	// Generate points
+	points := make([]Point, len(keys))
+	for i, k := range keys {
+		x := float64(padding) + float64(i)*scaleX
+		y := float64(height-padding) - (data[k]-minY)*scaleY
+		points[i] = Point{x, y}
+	}
+
+
 	return ""
 }
