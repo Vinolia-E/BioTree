@@ -22,3 +22,10 @@ type Point struct {
 	X float64
 	Y float64
 }
+
+// LineChartFromPairs generates an SVG line chart from a slice of x,y pairs
+func LineChartFromPairs(data []Point, xLabel, yLabel string) string {
+	if len(data) == 0 {
+		return generateEmptyChart(xLabel, yLabel)
+	}
+}
