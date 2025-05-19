@@ -1,8 +1,10 @@
 package chart
 
 import (
+	"fmt"
 	"math"
 	"sort"
+	"strings"
 )
 
 const (
@@ -50,7 +52,6 @@ func GenerateLineChartSVG(data map[string]float64) string {
 		maxY += 1
 	}
 
-
 	scaleX := float64(width-2*padding) / float64(len(keys)-1)
 	scaleY := float64(height-2*padding) / (maxY - minY)
 
@@ -62,6 +63,23 @@ func GenerateLineChartSVG(data map[string]float64) string {
 		points[i] = Point{x, y}
 	}
 
+	// Build SVG parts
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d">`, width, height))
+	sb.WriteString(fmt.Sprintf(`<rect width="100%%" height="100%%" fill="%s"/>`, bgColor))
+
+	// Axes
+	sb.WriteString(fmt.Sprintf(`<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s"/>`, padding, padding, padding, height-padding, axisColor))              // Y axis
+	sb.WriteString(fmt.Sprintf(`<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s"/>`, padding, height-padding, width-padding, height-padding, axisColor)) // X axis
+
+	// Gridlines & labels
+	for i, k := range keys {
+		x := float64(padding) + float64(i)*scaleX
+		y := float64(height - padding)
+
+		sb.WriteString(fmt.Sprintf(`<line x1="%.1f" y1="%d" x2="%.1f" y2="%d" stroke="%s" stroke-dasharray="2,2"/>`, x, padding, x, height-padding, gridColor))
+		sb.WriteString(fmt.Sprintf(`<text x="%.1f" y="%.1f" font-size="%d" text-anchor="middle">%s</text>`, x, y+fontSize+2, fontSize, k))
+	}
 
 	return ""
 }
