@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"BioTree/backend/util"
+	"github.com/Vinolia-E/BioTree/backend/util"
 )
 
 func TestNew(t *testing.T) {

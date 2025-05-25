@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strconv"
 
-	"BioTree/backend/util"
+	"github.com/Vinolia-E/BioTree/backend/util"
 )
 
 // ChartData represents the data to be visualized

@@ -3,7 +3,7 @@ package svgchart
 import (
 	"testing"
 
-	"BioTree/backend/util"
+	"github.com/Vinolia-E/BioTree/backend/util"
 )
 
 func TestDataConversion(t *testing.T) {
