@@ -52,9 +52,9 @@ func (bc *barChart) Generate() string {
 	// Add title if provided
 	if bc.options.Title != "" {
 		sb.AddText(bc.options.Width/2, 20, bc.options.Title, map[string]string{
-			"text-anchor":  "middle",
-			"font-family":  "Arial",
-			"font-size":    "16px",
+			"text-anchor": "middle",
+			"font-family": "Arial",
+			"font-size":   "16px",
 			"font-weight": "bold",
 			"fill":        bc.options.Colors.Title,
 		})
@@ -76,7 +76,7 @@ func (bc *barChart) Generate() string {
 				"text-anchor": "middle",
 				"font-family": "Arial",
 				"font-size":   "12px",
-				"fill":       bc.options.Colors.Text,
+				"fill":        bc.options.Colors.Text,
 			},
 		)
 	}
@@ -87,9 +87,9 @@ func (bc *barChart) Generate() string {
 			bc.options.Margins.Top+chartHeight/2,
 			bc.options.YLabel,
 			map[string]string{
-				"text-anchor":  "middle",
-				"font-family":  "Arial",
-				"font-size":    "12px",
+				"text-anchor": "middle",
+				"font-family": "Arial",
+				"font-size":   "12px",
 				"fill":        bc.options.Colors.Text,
 				"transform":   fmt.Sprintf("rotate(-90, 15, %d)", bc.options.Margins.Top+chartHeight/2),
 			},
@@ -111,8 +111,8 @@ func (bc *barChart) addGrid(sb *SVGBuilder, chartWidth, chartHeight int) {
 			bc.options.Margins.Left+chartWidth,
 			yPos,
 			map[string]string{
-				"stroke":         bc.options.Colors.Grid,
-				"stroke-width":   "1",
+				"stroke":           bc.options.Colors.Grid,
+				"stroke-width":     "1",
 				"stroke-dasharray": "5,5",
 			},
 		)
@@ -167,12 +167,12 @@ func (bc *barChart) addAxes(sb *SVGBuilder, chartWidth, chartHeight int, yMin, y
 			sb.AddText(
 				xPos,
 				m.Top+chartHeight+15,
-				bc.data[i].Label,
+				bc.data[i].Unit,
 				map[string]string{
 					"text-anchor": "middle",
 					"font-family": "Arial",
 					"font-size":   "10px",
-					"fill":       bc.options.Colors.Text,
+					"fill":        bc.options.Colors.Text,
 				},
 			)
 		}
@@ -194,7 +194,7 @@ func (bc *barChart) addAxes(sb *SVGBuilder, chartWidth, chartHeight int, yMin, y
 				"text-anchor": "end",
 				"font-family": "Arial",
 				"font-size":   "10px",
-				"fill":       bc.options.Colors.Text,
+				"fill":        bc.options.Colors.Text,
 			},
 		)
 	}

@@ -51,9 +51,9 @@ func (lc *lineChart) Generate() string {
 	// Add title if provided
 	if lc.options.Title != "" {
 		sb.AddText(lc.options.Width/2, 20, lc.options.Title, map[string]string{
-			"text-anchor":  "middle",
-			"font-family":  "Arial",
-			"font-size":    "16px",
+			"text-anchor": "middle",
+			"font-family": "Arial",
+			"font-size":   "16px",
 			"font-weight": "bold",
 			"fill":        lc.options.Colors.Title,
 		})
@@ -75,7 +75,7 @@ func (lc *lineChart) Generate() string {
 				"text-anchor": "middle",
 				"font-family": "Arial",
 				"font-size":   "12px",
-				"fill":       lc.options.Colors.Text,
+				"fill":        lc.options.Colors.Text,
 			},
 		)
 	}
@@ -86,9 +86,9 @@ func (lc *lineChart) Generate() string {
 			lc.options.Margins.Top+chartHeight/2,
 			lc.options.YLabel,
 			map[string]string{
-				"text-anchor":  "middle",
-				"font-family":  "Arial",
-				"font-size":    "12px",
+				"text-anchor": "middle",
+				"font-family": "Arial",
+				"font-size":   "12px",
 				"fill":        lc.options.Colors.Text,
 				"transform":   fmt.Sprintf("rotate(-90, 15, %d)", lc.options.Margins.Top+chartHeight/2),
 			},
@@ -110,8 +110,8 @@ func (lc *lineChart) addGrid(sb *SVGBuilder, chartWidth, chartHeight int) {
 			lc.options.Margins.Left+chartWidth,
 			yPos,
 			map[string]string{
-				"stroke":         lc.options.Colors.Grid,
-				"stroke-width":   "1",
+				"stroke":           lc.options.Colors.Grid,
+				"stroke-width":     "1",
 				"stroke-dasharray": "5,5",
 			},
 		)
@@ -172,12 +172,12 @@ func (lc *lineChart) addAxes(sb *SVGBuilder, chartWidth, chartHeight int, yMin, 
 			sb.AddText(
 				xPos,
 				m.Top+chartHeight+15,
-				lc.data[i].Label,
+				lc.data[i].Unit,
 				map[string]string{
 					"text-anchor": "middle",
 					"font-family": "Arial",
 					"font-size":   "10px",
-					"fill":       lc.options.Colors.Text,
+					"fill":        lc.options.Colors.Text,
 				},
 			)
 		}
@@ -199,7 +199,7 @@ func (lc *lineChart) addAxes(sb *SVGBuilder, chartWidth, chartHeight int, yMin, 
 				"text-anchor": "end",
 				"font-family": "Arial",
 				"font-size":   "10px",
-				"fill":       lc.options.Colors.Text,
+				"fill":        lc.options.Colors.Text,
 			},
 		)
 	}
