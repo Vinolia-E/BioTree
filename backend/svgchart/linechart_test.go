@@ -24,7 +24,7 @@ func TestLineChart(t *testing.T) {
         },
         {
             name: "Single data point",
-            data: ChartData{{Label: "A", Value: 10.0}},
+            data: ChartData{{Unit: "A", Value: 10.0}},
             options: DefaultOptions(),
             checks: func(t *testing.T, svg string) {
                 if !strings.Contains(svg, "circle") {
@@ -34,7 +34,7 @@ func TestLineChart(t *testing.T) {
         },
         {
             name: "Equal Y values",
-            data: ChartData{{Label: "A", Value: 10.0}, {Label: "B", Value: 10.0}},
+            data: ChartData{{Unit: "A", Value: 10.0}, {Unit: "B", Value: 10.0}},
             options: DefaultOptions(),
             checks: func(t *testing.T, svg string) {
                 if !strings.Contains(svg, "path") {
@@ -44,29 +44,29 @@ func TestLineChart(t *testing.T) {
         },
         {
             name: "With title and labels",
-            data: ChartData{{Label: "A", Value: 10.0}, {Label: "B", Value: 20.0}},
+            data: ChartData{{Unit: "A", Value: 10.0}, {Unit: "B", Value: 20.0}},
             options: func() Options {
                 o := DefaultOptions()
                 o.Title = "Test Title"
-                o.XLabel = "X Label"
-                o.YLabel = "Y Label"
+                o.XLabel = "X Unit"
+                o.YLabel = "Y Unit"
                 return o
             }(),
             checks: func(t *testing.T, svg string) {
                 if !strings.Contains(svg, "Test Title") {
                     t.Error("Chart should contain title")
                 }
-                if !strings.Contains(svg, "X Label") {
+                if !strings.Contains(svg, "X Unit") {
                     t.Error("Chart should contain X label")
                 }
-                if !strings.Contains(svg, "Y Label") {
+                if !strings.Contains(svg, "Y Unit") {
                     t.Error("Chart should contain Y label")
                 }
             },
         },
         {
             name: "Without grid",
-            data: ChartData{{Label: "A", Value: 10.0}, {Label: "B", Value: 20.0}},
+            data: ChartData{{Unit: "A", Value: 10.0}, {Unit: "B", Value: 20.0}},
             options: func() Options {
                 o := DefaultOptions()
                 o.ShowGrid = false

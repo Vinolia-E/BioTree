@@ -4,21 +4,18 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+
+	"github.com/Vinolia-E/BioTree/backend/util"
 )
 
-type DataPoint struct {
-	Label string
-	Value float64
-}
-
 // ChartData represents the data to be visualized
-type ChartData []DataPoint
+type ChartData []util.DataPoint
 
 func ConvertData(data interface{}) (ChartData, error) {
 	switch d := data.(type) {
 	case map[string]float64:
 		return mapToDataPoints(d), nil
-	case []DataPoint:
+	case []util.DataPoint:
 		return d, nil
 	case []Point:
 		return pointsToDataPoints(d), nil
@@ -32,10 +29,10 @@ func ConvertData(data interface{}) (ChartData, error) {
 func mapToDataPoints(data map[string]float64) ChartData {
 	var points ChartData
 	for label, value := range data {
-		points = append(points, DataPoint{Label: label, Value: value})
+		points = append(points, util.DataPoint{Unit: label, Value: value})
 	}
 	sort.Slice(points, func(i, j int) bool {
-		return points[i].Label < points[j].Label
+		return points[i].Unit < points[j].Unit
 	})
 	return points
 }
@@ -43,7 +40,7 @@ func mapToDataPoints(data map[string]float64) ChartData {
 func pointsToDataPoints(points []Point) ChartData {
 	var data ChartData
 	for _, p := range points {
-		data = append(data, DataPoint{Label: p.X, Value: p.Y})
+		data = append(data, util.DataPoint{Unit: p.X, Value: p.Y})
 	}
 	return data
 }
@@ -75,7 +72,7 @@ func sliceToDataPoints(data [][]interface{}) (ChartData, error) {
 			value = val
 		}
 
-		points = append(points, DataPoint{Label: label, Value: value})
+		points = append(points, util.DataPoint{Unit: label, Value: value})
 	}
 	return points, nil
 }
