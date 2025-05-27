@@ -14,6 +14,18 @@ import (
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	if err := os.MkdirAll("files", os.ModePerm); err != nil {
+		log.Println("Failed to create files directory:", err)
+		util.RespondError(w, "Internal server error")
+		return
+	}
+
+	if err := os.MkdirAll("data", os.ModePerm); err != nil {
+		log.Println("Failed to create data directory:", err)
+		util.RespondError(w, "Internal server error")
+		return
+	}
+
 	// Parse multipart form (10MB max memory)
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
 		log.Println("Failed to parse form data:", err)
@@ -22,7 +34,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get file from form data
-	file, _, err := r.FormFile("file")
+	file, _, err := r.FormFile("document")
 	if err != nil {
 		log.Println("Failed to retrieve file from form data:", err)
 		util.RespondError(w, "Failed to retrieve file: "+err.Error())
