@@ -1,6 +1,10 @@
 package route
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/Vinolia-E/BioTree/backend/handler"
+)
 
 func InitRoutes() *http.ServeMux {
 	r := http.NewServeMux()
@@ -11,6 +15,8 @@ func InitRoutes() *http.ServeMux {
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "frontend/templates/index.html")
 	})
+
+	r.HandleFunc("/upload", handler.UploadHandler)
 
 	return r
 }
