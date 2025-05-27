@@ -12,3 +12,9 @@ func RespondError(w http.ResponseWriter, message string) {
 		"message": message,
 	})
 }
+
+func RespondSuccess(w http.ResponseWriter) {
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "ok",
+	})
+}
