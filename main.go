@@ -11,11 +11,11 @@ func main() {
 	router := route.InitRoutes()
 
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:   ":8080",
 		Handler: router,
 	}
 
-	log.Printf("Starting server on %s", server.Addr)
+	log.Printf("Starting server on http://localhost%s", server.Addr)
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
