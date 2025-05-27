@@ -10,7 +10,7 @@ func InitRoutes() *http.ServeMux {
 	r := http.NewServeMux()
 
 	fs := http.FileServer(http.Dir("frontend/static"))
-	r.Handle("/frontend/", http.StripPrefix("/frontend/", fs))
+	r.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "frontend/templates/index.html")
