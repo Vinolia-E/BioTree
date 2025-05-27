@@ -162,27 +162,30 @@ document.addEventListener('DOMContentLoaded', () => {
       'input[name="chart-type"]:checked'
     ).value;
 
-    async function processFile() {
-      try {
-        const formData = new FormData();
-        formData.append('document', file);
-        formData.append('chart_type', chartType);
-
-        const response = await fetch('/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        const result = await response.json();
-        alert(`File processed successfully! Chart type: ${result.chart_type}`);
-      } catch (error) {
-        console.error('Error processing file:', error);
-        alert('Error processing file. Please try again.');
-      }
-    }
+    uploadFile(file, chartType);
   });
 });
+
+
+const uploadFile = async (file, chartType) => {
+  try {
+    const formData = new FormData();
+    formData.append('document', file);
+    formData.append('chart_type', chartType);
+
+    const response = await fetch('/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const result = await response.json();
+    alert(`File processed successfully! Chart type: ${result.chart_type}`);
+  } catch (error) {
+    console.error('Error processing file:', error);
+    alert('Error processing file. Please try again.');
+  }
+}
