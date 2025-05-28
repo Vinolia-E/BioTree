@@ -11,6 +11,21 @@ import (
 	"github.com/google/uuid"
 )
 
+/*
+UploadHandler handles document uploads and converts them to JSON.
+
+- Accepts multipart form data with a "document" file field (PDF, TXT, DOCX).
+- Saves the uploaded file in the "files/" directory with a UUID filename.
+- Converts the file to structured JSON via ParseDocumentToJSON().
+- Saves the output in the "data/" directory.
+
+Responds:
+- 200: {"status": "success"}
+- 400/500: {"error": "Error message"}
+
+Used by: POST /upload
+*/
+
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
