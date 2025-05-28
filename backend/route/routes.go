@@ -7,16 +7,16 @@ import (
 )
 
 func InitRoutes() *http.ServeMux {
-	r := http.NewServeMux()
+	router := http.NewServeMux()
 
 	fs := http.FileServer(http.Dir("frontend/static"))
-	r.Handle("/static/", http.StripPrefix("/static/", fs))
+	router.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "frontend/templates/index.html")
 	})
 
-	r.HandleFunc("/upload", handler.UploadHandler)
+	router.HandleFunc("/upload", handler.UploadHandler)
 
-	return r
+	return router
 }
