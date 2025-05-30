@@ -18,5 +18,10 @@ func InitRoutes() *http.ServeMux {
 
 	r.HandleFunc("/upload", handler.UploadHandler)
 
+	// SVG chart generation endpoints
+	r.HandleFunc("/api/generate-chart", handler.GenerateChartHandler)
+	r.HandleFunc("/api/data-files", handler.ListDataFilesHandler)
+	r.HandleFunc("/api/process-and-generate", handler.ProcessAndGenerateHandler)
+
 	return r
 }
