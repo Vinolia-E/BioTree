@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -9,10 +11,37 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/Vinolia-E/BioTree/backend/svgchart"
 	"github.com/Vinolia-E/BioTree/backend/util"
+	"golang.org/x/time/rate"
+)
+
+const (
+	maxFileSize    = 10 << 20 // 10MB
+	maxWidth       = 4096
+	maxHeight      = 4096
+	defaultWidth   = 800
+	defaultHeight  = 400
+	cacheExpiry    = 1 * time.Hour
+)
+
+var (
+	validChartTypes = map[string]bool{
+		"line": true,
+		"bar":  true,
+	}
+
+	// Cache for generated SVGs
+	svgCache = &cache{
+		items: make(map[string]cacheItem),
+	}
+
+	// Rate limiter: 100 requests per minute
+	limiter = rate.NewLimiter(rate.Every(time.Minute/100), 1)
 )
 
 // ChartRequest represents the request payload for chart generation
@@ -26,8 +55,53 @@ type ChartRequest struct {
 	Height    int    `json:"height,omitempty"`
 }
 
+type cache struct {
+	sync.RWMutex
+	items map[string]cacheItem
+}
+
+type cacheItem struct {
+	svg       string
+	createdAt time.Time
+}
+
+// validate checks if the chart request is valid
+func (r *ChartRequest) validate() error {
+	if r.DataFile == "" {
+		return errors.New("data_file is required")
+	}
+
+	if r.ChartType != "" && !validChartTypes[r.ChartType] {
+		return fmt.Errorf("invalid chart type: %s", r.ChartType)
+	}
+
+	if r.Width < 0 || r.Width > maxWidth {
+		return fmt.Errorf("width must be between 0 and %d", maxWidth)
+	}
+
+	if r.Height < 0 || r.Height > maxHeight {
+		return fmt.Errorf("height must be between 0 and %d", maxHeight)
+	}
+
+	return nil
+}
+
 // GenerateChartHandler generates SVG charts from processed JSON data
 func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
+	// Apply rate limiting
+	if !limiter.Allow() {
+		http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
+		return
+	}
+
+	// Set CORS headers if needed
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	if r.Method == http.MethodOptions {
+		return
+	}
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -52,8 +126,38 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 		req.ChartType = "line" // default to line chart
 	}
 
+	// Validate request
+	if err := req.validate(); err != nil {
+		log.Printf("Invalid request: %v", err)
+		util.RespondError(w, err.Error())
+		return
+	}
+
+	// Check cache first
+	cacheKey := fmt.Sprintf("%s-%s-%d-%d", req.DataFile, req.ChartType, req.Width, req.Height)
+	svgCache.RLock()
+	if item, ok := svgCache.items[cacheKey]; ok {
+		if time.Since(item.createdAt) < cacheExpiry {
+			svgCache.RUnlock()
+			responseWithCompression(w, r, map[string]interface{}{
+				"status": "ok",
+				"svg":    item.svg,
+				"type":   req.ChartType,
+				"cached": true,
+			})
+			return
+		}
+	}
+	svgCache.RUnlock()
+
 	// Read the JSON data file
-	dataPath := filepath.Join("data", req.DataFile)
+	dataPath := filepath.Clean(filepath.Join("data", req.DataFile))
+	if !strings.HasPrefix(dataPath, filepath.Clean("data/")) {
+		log.Println("Path traversal attempt detected")
+		util.RespondError(w, "Invalid file path")
+		return
+	}
+
 	jsonData, err := os.ReadFile(dataPath)
 	if err != nil {
 		log.Println("Failed to read data file:", err)
@@ -116,14 +220,21 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 
 	svgContent := chart.Generate()
 
-	// Return the SVG content
-	response := map[string]interface{}{
+	// Cache the result
+	svgCache.Lock()
+	svgCache.items[cacheKey] = cacheItem{
+		svg:       svgContent,
+		createdAt: time.Now(),
+	}
+	svgCache.Unlock()
+
+	// Return the SVG content with compression
+	responseWithCompression(w, r, map[string]interface{}{
 		"status": "ok",
 		"svg":    svgContent,
 		"type":   req.ChartType,
-	}
-
-	json.NewEncoder(w).Encode(response)
+		"cached": false,
+	})
 }
 
 // ListDataFilesHandler returns a list of available processed data files
@@ -169,6 +280,22 @@ func ListDataFilesHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// responseWithCompression writes a JSON response with optional gzip compression
+func responseWithCompression(w http.ResponseWriter, r *http.Request, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Check if client accepts gzip
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		w.Header().Set("Content-Encoding", "gzip")
+		gz := gzip.NewWriter(w)
+		defer gz.Close()
+		json.NewEncoder(gz).Encode(data)
+		return
+	}
+
+	json.NewEncoder(w).Encode(data)
+}
+
 // ProcessAndGenerateHandler combines file processing and chart generation
 func ProcessAndGenerateHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -191,8 +318,8 @@ func ProcessAndGenerateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse multipart form (10MB max memory)
-	if err := r.ParseMultipartForm(10 << 20); err != nil {
+	// Parse multipart form with size limit
+	if err := r.ParseMultipartForm(maxFileSize); err != nil {
 		log.Println("Failed to parse form data:", err)
 		util.RespondError(w, "Failed to parse form data")
 		return
