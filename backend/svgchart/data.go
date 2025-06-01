@@ -37,9 +37,9 @@ func convertUtilDataPoints(data []util.DataPoint) ChartData {
 	result := make(ChartData, len(data))
 	for i, d := range data {
 		result[i] = DataPoint{
-			Label:  fmt.Sprintf("%.2f %s", d.Value, d.Unit),
-			Value:  d.Value,
-			Unit:   d.Unit,
+			Label: fmt.Sprintf("%.2f %s", d.Value, d.Unit),
+			Value: d.Value,
+			Unit:  d.Unit,
 		}
 	}
 	return result

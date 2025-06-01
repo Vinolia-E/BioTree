@@ -21,12 +21,12 @@ import (
 )
 
 const (
-	maxFileSize    = 10 << 20 // 10MB
-	maxWidth       = 4096
-	maxHeight      = 4096
-	defaultWidth   = 800
-	defaultHeight  = 400
-	cacheExpiry    = 1 * time.Hour
+	maxFileSize   = 10 << 20 // 10MB
+	maxWidth      = 4096
+	maxHeight     = 4096
+	defaultWidth  = 800
+	defaultHeight = 400
+	cacheExpiry   = 1 * time.Hour
 )
 
 var (

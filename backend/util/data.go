@@ -29,15 +29,17 @@ Returns:
 - []DataPoint: a slice of DataPoint structs, each containing a float64 value and a unit string.
 
 Example:
-  input := "Air quality is 23.5 µg/m³, temperature is 30.2 °C, and rainfall is 5 mm"
-  output := []DataPoint{
-      {Value: 23.5, Unit: "µg/m³"},
-      {Value: 30.2, Unit: "°C"},
-      {Value: 5.0, Unit: "mm"},
-  } */
+
+	input := "Air quality is 23.5 µg/m³, temperature is 30.2 °C, and rainfall is 5 mm"
+	output := []DataPoint{
+	    {Value: 23.5, Unit: "µg/m³"},
+	    {Value: 30.2, Unit: "°C"},
+	    {Value: 5.0, Unit: "mm"},
+	}
+*/
 func GetData(text string) []DataPoint {
 	var results []DataPoint
-	
+
 	pattern := regexp.MustCompile(`(?i)(-?\d+(?:\.\d+)?)\s*(µg/m³|ppm|°C|°F|mm|cm|m|km|in|ft|yd|mi|ha|km²|m²|acres|g|kg|mg|lb|oz|L|mL|vehicles/hr|count/month|permits|vehicles|kWh|W|MW|dB|%|mg/L|μS/cm|NTU|Bq/m³|AQI|mmHg|hPa|Pa|bar|psi)?`)
 
 	matches := pattern.FindAllStringSubmatch(text, -1)

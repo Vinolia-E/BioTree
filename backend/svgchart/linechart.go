@@ -8,8 +8,8 @@ import (
 
 // lineChart implements the Chart interface for line charts
 type lineChart struct {
-	data    ChartData
-	options Options
+	data     ChartData
+	options  Options
 	minValue float64
 	maxValue float64
 	padding  int
@@ -22,7 +22,7 @@ func newLineChart(data ChartData, options Options) Chart {
 		options: options,
 		padding: 40,
 	}
-	
+
 	// Calculate min and max values
 	lc.minValue = math.MaxFloat64
 	lc.maxValue = -math.MaxFloat64
@@ -34,12 +34,12 @@ func newLineChart(data ChartData, options Options) Chart {
 			lc.maxValue = d.Value
 		}
 	}
-	
+
 	// Add some padding to min/max
 	valueRange := lc.maxValue - lc.minValue
 	lc.minValue -= valueRange * 0.1
 	lc.maxValue += valueRange * 0.1
-	
+
 	return lc
 }
 
@@ -83,11 +83,11 @@ func (lc *lineChart) Generate() string {
 	for i := 0; i <= numGridLines; i++ {
 		y := float64(lc.padding) + (graphHeight * float64(i) / float64(numGridLines))
 		value := lc.maxValue - ((lc.maxValue - lc.minValue) * float64(i) / float64(numGridLines))
-		
+
 		// Grid line
 		svg += fmt.Sprintf(`<line x1="%d" y1="%f" x2="%d" y2="%f" class="grid"/>`,
 			lc.padding, y, width-lc.padding, y)
-		
+
 		// Y-axis label
 		svg += fmt.Sprintf(`<text x="%d" y="%f" text-anchor="end" alignment-baseline="middle" class="label">%.1f</text>`,
 			lc.padding-5, y, value)
