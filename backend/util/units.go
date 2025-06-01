@@ -31,3 +31,30 @@ func GetUnitsFromFile(filePath string) ([]string, error) {
 
 	return units, nil
 }
+
+// GetDataByUnitFromFile returns a JSON string of all entries from the file with the specified unit.
+func GetDataByUnitFromFile(filePath string, unit string) (string, error) {
+	dataBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("reading file: %w", err)
+	}
+
+	var data []DataPoint
+	if err := json.Unmarshal(dataBytes, &data); err != nil {
+		return "", fmt.Errorf("unmarshaling JSON: %w", err)
+	}
+
+	var filtered []DataPoint
+	for _, dp := range data {
+		if dp.Unit == unit {
+			filtered = append(filtered, dp)
+		}
+	}
+
+	result, err := json.MarshalIndent(filtered, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("marshaling result: %w", err)
+	}
+
+	return string(result), nil
+}
