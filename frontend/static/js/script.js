@@ -3,39 +3,39 @@
  * Enhanced JavaScript for SVG handler integration
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   // DOM Elements
-  const dropArea = document.getElementById('dropArea');
-  const fileInput = document.getElementById('document-upload');
-  const filePreview = document.getElementById('filePreview');
-  const chartPreview = document.getElementById('chartPreview');
-  const processBtn = document.getElementById('processBtn');
+  const dropArea = document.getElementById("dropArea");
+  const fileInput = document.getElementById("document-upload");
+  const filePreview = document.getElementById("filePreview");
+  const chartPreview = document.getElementById("chartPreview");
+  const processBtn = document.getElementById("processBtn");
   const chartOptions = document.querySelectorAll('input[name="chart-type"]');
-  const visualizationSection = document.querySelector('.visualization-section');
+  const visualizationSection = document.querySelector(".visualization-section");
 
   // State management
   let currentSvg = null;
   let currentDataFile = null;
   let chartParameters = {
-    title: 'Data Visualization',
-    x_label: 'Categories',
-    y_label: 'Values',
+    title: "Data Visualization",
+    x_label: "Categories",
+    y_label: "Values",
     width: 800,
-    height: 400
+    height: 400,
   };
 
   // Accepted files
   const fileTypes = [
-    'application/pdf',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain',
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
   ];
 
   // Initialize with visualization section hidden
-  visualizationSection.style.display = 'none';
+  visualizationSection.style.display = "none";
 
   // Event Listeners for drag and drop
-  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((eventName) => {
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
     dropArea.addEventListener(eventName, preventDefaults, false);
   });
 
@@ -44,24 +44,24 @@ document.addEventListener('DOMContentLoaded', () => {
     e.stopPropagation();
   }
 
-  ['dragenter', 'dragover'].forEach((eventName) => {
+  ["dragenter", "dragover"].forEach((eventName) => {
     dropArea.addEventListener(eventName, highlight, false);
   });
 
-  ['dragleave', 'drop'].forEach((eventName) => {
+  ["dragleave", "drop"].forEach((eventName) => {
     dropArea.addEventListener(eventName, unhighlight, false);
   });
 
   function highlight() {
-    dropArea.classList.add('highlight');
+    dropArea.classList.add("highlight");
   }
 
   function unhighlight() {
-    dropArea.classList.remove('highlight');
+    dropArea.classList.remove("highlight");
   }
 
   // Handle dropped files
-  dropArea.addEventListener('drop', handleDrop, false);
+  dropArea.addEventListener("drop", handleDrop, false);
 
   function handleDrop(e) {
     const dt = e.dataTransfer;
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Handle file selection via input
-  fileInput.addEventListener('change', function() {
+  fileInput.addEventListener("change", function () {
     handleFiles(this.files);
   });
 
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (validFileType(file)) {
       displayFileInfo(file);
       processBtn.disabled = false;
-      visualizationSection.style.display = 'block';
+      visualizationSection.style.display = "block";
       updateChartPreview();
     } else {
       filePreview.innerHTML = `
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Please select a PDF, DOCX, or TXT file.</p>
       `;
       processBtn.disabled = true;
-      visualizationSection.style.display = 'none';
+      visualizationSection.style.display = "none";
     }
   }
 
@@ -101,9 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function validFileType(file) {
     return (
       fileTypes.includes(file.type) ||
-      file.name.endsWith('.pdf') ||
-      file.name.endsWith('.docx') ||
-      file.name.endsWith('.txt')
+      file.name.endsWith(".pdf") ||
+      file.name.endsWith(".docx") ||
+      file.name.endsWith(".txt")
     );
   }
 
@@ -132,26 +132,26 @@ document.addEventListener('DOMContentLoaded', () => {
   // Format file size
   function formatFileSize(bytes) {
     if (bytes < 1024) {
-      return bytes + ' bytes';
+      return bytes + " bytes";
     } else if (bytes < 1048576) {
-      return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1024).toFixed(1) + " KB";
     } else {
-      return (bytes / 1048576).toFixed(1) + ' MB';
+      return (bytes / 1048576).toFixed(1) + " MB";
     }
   }
 
   // Get file icon type
   function getFileIconType(file) {
-    if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-      return 'pdf-icon';
+    if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+      return "pdf-icon";
     } else if (
       file.type ===
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-      file.name.endsWith('.docx')
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+      file.name.endsWith(".docx")
     ) {
-      return 'docx-icon';
+      return "docx-icon";
     } else {
-      return 'txt-icon';
+      return "txt-icon";
     }
   }
 
@@ -177,14 +177,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Listen for chart type changes
   chartOptions.forEach((option) => {
-    option.addEventListener('change', updateChartPreview);
+    option.addEventListener("change", updateChartPreview);
   });
 
   // Process button click handler
-  processBtn.addEventListener('click', async () => {
+  processBtn.addEventListener("click", async () => {
     const file = fileInput.files[0];
     if (!file) {
-      showNotification('Please select a file first', 'error');
+      showNotification("Please select a file first", "error");
       return;
     }
 
@@ -194,50 +194,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show loading state
     processBtn.disabled = true;
-    processBtn.textContent = 'Processing...';
+    processBtn.textContent = "Processing...";
     showLoadingIndicator(chartPreview);
 
     try {
       const result = await uploadAndProcessFile(file, chartType);
-      
+
       // Store the data file name for later use
       currentDataFile = result.data_file;
-      
+
       // Display the generated SVG chart
       if (result.svg) {
         displaySvgChart(result.svg);
         currentSvg = result.svg;
-        
+
         // Add chart controls after successful generation
         addChartControls();
       }
-      
+
       // Show success message
-      showNotification(`File processed successfully! Chart type: ${result.chart_type}`, 'success');
+      showNotification(
+        `File processed successfully! Chart type: ${result.chart_type}`,
+        "success"
+      );
     } catch (error) {
-      console.error('Error:', error);
-      showNotification('Error processing file. Please try again.', 'error');
+      console.error("Error:", error);
+      showNotification("Error processing file. Please try again.", "error");
     } finally {
       // Reset button state
       processBtn.disabled = false;
-      processBtn.textContent = 'Process Document';
+      processBtn.textContent = "Process Document";
     }
   });
 
   // Upload and process file
   async function uploadAndProcessFile(file, chartType) {
     const formData = new FormData();
-    formData.append('document', file);
-    formData.append('chart_type', chartType);
+    formData.append("document", file);
+    formData.append("chart_type", chartType);
 
-    const response = await fetch('/api/process-and-generate', {
-      method: 'POST',
+    const response = await fetch("/api/process-and-generate", {
+      method: "POST",
       body: formData,
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Network response was not ok');
+      throw new Error(errorData.message || "Network response was not ok");
     }
 
     return await response.json();
@@ -246,14 +249,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Generate chart from existing data file
   async function generateChart(dataFile, chartType) {
     if (!dataFile) return;
-    
+
     showLoadingIndicator(chartPreview);
-    
+
     try {
-      const response = await fetch('/api/generate-chart', {
-        method: 'POST',
+      const response = await fetch("/api/generate-chart", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           data_file: dataFile,
@@ -262,38 +265,38 @@ document.addEventListener('DOMContentLoaded', () => {
           x_label: chartParameters.x_label,
           y_label: chartParameters.y_label,
           width: chartParameters.width,
-          height: chartParameters.height
+          height: chartParameters.height,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to generate chart');
+        throw new Error(errorData.message || "Failed to generate chart");
       }
 
       const result = await response.json();
-      
+
       if (result.svg) {
         displaySvgChart(result.svg);
         currentSvg = result.svg;
       }
     } catch (error) {
-      console.error('Error generating chart:', error);
-      showNotification('Error generating chart. Please try again.', 'error');
+      console.error("Error generating chart:", error);
+      showNotification("Error generating chart. Please try again.", "error");
     }
   }
 
   // Display SVG chart
   function displaySvgChart(svgContent) {
     chartPreview.innerHTML = svgContent;
-    
+
     // Make SVG responsive
-    const svgElement = chartPreview.querySelector('svg');
+    const svgElement = chartPreview.querySelector("svg");
     if (svgElement) {
-      svgElement.setAttribute('width', '100%');
-      svgElement.setAttribute('height', 'auto');
-      svgElement.style.maxHeight = '500px';
-      
+      svgElement.setAttribute("width", "100%");
+      svgElement.setAttribute("height", "auto");
+      svgElement.style.maxHeight = "500px";
+
       // Add interactivity to SVG elements
       enhanceSvgInteractivity(svgElement);
     }
@@ -302,58 +305,62 @@ document.addEventListener('DOMContentLoaded', () => {
   // Add interactivity to SVG elements
   function enhanceSvgInteractivity(svgElement) {
     // Add tooltips to data points
-    const dataElements = svgElement.querySelectorAll('circle, rect');
-    dataElements.forEach(element => {
-      element.style.cursor = 'pointer';
-      
+    const dataElements = svgElement.querySelectorAll("circle, rect");
+    dataElements.forEach((element) => {
+      element.style.cursor = "pointer";
+
       // Create tooltip element
-      const tooltip = document.createElement('div');
-      tooltip.className = 'svg-tooltip';
-      tooltip.style.position = 'absolute';
-      tooltip.style.display = 'none';
-      tooltip.style.background = 'rgba(0,0,0,0.8)';
-      tooltip.style.color = 'white';
-      tooltip.style.padding = '5px';
-      tooltip.style.borderRadius = '3px';
-      tooltip.style.fontSize = '12px';
-      tooltip.style.pointerEvents = 'none';
-      tooltip.style.zIndex = '1000';
+      const tooltip = document.createElement("div");
+      tooltip.className = "svg-tooltip";
+      tooltip.style.position = "absolute";
+      tooltip.style.display = "none";
+      tooltip.style.background = "rgba(0,0,0,0.8)";
+      tooltip.style.color = "white";
+      tooltip.style.padding = "5px";
+      tooltip.style.borderRadius = "3px";
+      tooltip.style.fontSize = "12px";
+      tooltip.style.pointerEvents = "none";
+      tooltip.style.zIndex = "1000";
       document.body.appendChild(tooltip);
-      
+
       // Get data values from element attributes
-      const value = element.getAttribute('data-value') || 
-                   (element.getAttribute('height') ? 
-                    parseFloat(element.getAttribute('height')).toFixed(2) : 
-                    'N/A');
-      
-      const category = element.getAttribute('data-category') || 'Data point';
-      
+      const value =
+        element.getAttribute("data-value") ||
+        (element.getAttribute("height")
+          ? parseFloat(element.getAttribute("height")).toFixed(2)
+          : "N/A");
+
+      const category = element.getAttribute("data-category") || "Data point";
+
       // Show tooltip on hover
-      element.addEventListener('mouseover', (e) => {
+      element.addEventListener("mouseover", (e) => {
         tooltip.textContent = `${category}: ${value}`;
-        tooltip.style.display = 'block';
+        tooltip.style.display = "block";
         tooltip.style.left = `${e.pageX + 10}px`;
         tooltip.style.top = `${e.pageY + 10}px`;
-        
+
         // Highlight the element
-        element.setAttribute('data-original-fill', element.getAttribute('fill'));
-        element.setAttribute('fill', '#ff7700');
+        element.setAttribute(
+          "data-original-fill",
+          element.getAttribute("fill")
+        );
+        element.setAttribute("fill", "#ff7700");
       });
-      
+
       // Move tooltip with cursor
-      element.addEventListener('mousemove', (e) => {
+      element.addEventListener("mousemove", (e) => {
         tooltip.style.left = `${e.pageX + 10}px`;
         tooltip.style.top = `${e.pageY + 10}px`;
       });
-      
+
       // Hide tooltip when not hovering
-      element.addEventListener('mouseout', () => {
-        tooltip.style.display = 'none';
-        
+      element.addEventListener("mouseout", () => {
+        tooltip.style.display = "none";
+
         // Restore original color
-        const originalFill = element.getAttribute('data-original-fill');
+        const originalFill = element.getAttribute("data-original-fill");
         if (originalFill) {
-          element.setAttribute('fill', originalFill);
+          element.setAttribute("fill", originalFill);
         }
       });
     });
@@ -362,17 +369,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Add chart controls
   function addChartControls() {
     // Create controls container if it doesn't exist
-    let controlsContainer = document.getElementById('chart-controls');
+    let controlsContainer = document.getElementById("chart-controls");
     if (!controlsContainer) {
-      controlsContainer = document.createElement('div');
-      controlsContainer.id = 'chart-controls';
-      controlsContainer.className = 'chart-controls';
-      chartPreview.insertAdjacentElement('afterend', controlsContainer);
+      controlsContainer = document.createElement("div");
+      controlsContainer.id = "chart-controls";
+      controlsContainer.className = "chart-controls";
+      chartPreview.insertAdjacentElement("afterend", controlsContainer);
     }
-    
+
     // Clear existing controls
-    controlsContainer.innerHTML = '';
-    
+    controlsContainer.innerHTML = "";
+
     // Add chart parameter controls
     controlsContainer.innerHTML = `
       <div class="control-group">
@@ -406,146 +413,169 @@ document.addEventListener('DOMContentLoaded', () => {
         <button id="list-data-files-btn">Browse Data Files</button>
       </div>
     `;
-    
+
     // Add event listeners to controls
-    document.getElementById('update-chart-btn').addEventListener('click', () => {
-      // Update chart parameters
-      chartParameters.title = document.getElementById('chart-title').value;
-      chartParameters.x_label = document.getElementById('chart-x-label').value;
-      chartParameters.y_label = document.getElementById('chart-y-label').value;
-      chartParameters.width = parseInt(document.getElementById('chart-width').value);
-      chartParameters.height = parseInt(document.getElementById('chart-height').value);
-      
-      // Regenerate chart with new parameters
-      const chartType = document.querySelector('input[name="chart-type"]:checked').value;
-      generateChart(currentDataFile, chartType);
-    });
-    
+    document
+      .getElementById("update-chart-btn")
+      .addEventListener("click", () => {
+        // Update chart parameters
+        chartParameters.title = document.getElementById("chart-title").value;
+        chartParameters.x_label =
+          document.getElementById("chart-x-label").value;
+        chartParameters.y_label =
+          document.getElementById("chart-y-label").value;
+        chartParameters.width = parseInt(
+          document.getElementById("chart-width").value
+        );
+        chartParameters.height = parseInt(
+          document.getElementById("chart-height").value
+        );
+
+        // Regenerate chart with new parameters
+        const chartType = document.querySelector(
+          'input[name="chart-type"]:checked'
+        ).value;
+        generateChart(currentDataFile, chartType);
+      });
+
     // Download SVG button
-    document.getElementById('download-svg-btn').addEventListener('click', () => {
-      if (!currentSvg) {
-        showNotification('No chart available to download', 'error');
-        return;
-      }
-      
-      // Create a blob from the SVG content
-      const blob = new Blob([currentSvg], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(blob);
-      
-      // Create download link
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `chart_${new Date().getTime()}.svg`;
-      document.body.appendChild(a);
-      a.click();
-      
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 100);
-    });
-    
-    // Download PNG button
-    document.getElementById('download-png-btn').addEventListener('click', () => {
-      if (!currentSvg) {
-        showNotification('No chart available to download', 'error');
-        return;
-      }
-      
-      // Create a canvas element
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      // Create an image from the SVG
-      const img = new Image();
-      const svgBlob = new Blob([currentSvg], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(svgBlob);
-      
-      img.onload = function() {
-        // Set canvas dimensions
-        canvas.width = img.width;
-        canvas.height = img.height;
-        
-        // Draw image to canvas
-        ctx.drawImage(img, 0, 0);
-        
-        // Convert to PNG
-        try {
-          const pngUrl = canvas.toDataURL('image/png');
-          
-          // Create download link
-          const a = document.createElement('a');
-          a.href = pngUrl;
-          a.download = `chart_${new Date().getTime()}.png`;
-          document.body.appendChild(a);
-          a.click();
-          
-          // Clean up
-          setTimeout(() => {
-            document.body.removeChild(a);
-          }, 100);
-        } catch (e) {
-          console.error('Error converting to PNG:', e);
-          showNotification('Error creating PNG. Try downloading as SVG instead.', 'error');
+    document
+      .getElementById("download-svg-btn")
+      .addEventListener("click", () => {
+        if (!currentSvg) {
+          showNotification("No chart available to download", "error");
+          return;
         }
-        
+
+        // Create a blob from the SVG content
+        const blob = new Blob([currentSvg], { type: "image/svg+xml" });
+        const url = URL.createObjectURL(blob);
+
+        // Create download link
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `chart_${new Date().getTime()}.svg`;
+        document.body.appendChild(a);
+        a.click();
+
         // Clean up
-        URL.revokeObjectURL(url);
-      };
-      
-      img.src = url;
-    });
-    
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+      });
+
+    // Download PNG button
+    document
+      .getElementById("download-png-btn")
+      .addEventListener("click", () => {
+        if (!currentSvg) {
+          showNotification("No chart available to download", "error");
+          return;
+        }
+
+        // Create a canvas element
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Create an image from the SVG
+        const img = new Image();
+        const svgBlob = new Blob([currentSvg], { type: "image/svg+xml" });
+        const url = URL.createObjectURL(svgBlob);
+
+        img.onload = function () {
+          // Set canvas dimensions
+          canvas.width = img.width;
+          canvas.height = img.height;
+
+          // Draw image to canvas
+          ctx.drawImage(img, 0, 0);
+
+          // Convert to PNG
+          try {
+            const pngUrl = canvas.toDataURL("image/png");
+
+            // Create download link
+            const a = document.createElement("a");
+            a.href = pngUrl;
+            a.download = `chart_${new Date().getTime()}.png`;
+            document.body.appendChild(a);
+            a.click();
+
+            // Clean up
+            setTimeout(() => {
+              document.body.removeChild(a);
+            }, 100);
+          } catch (e) {
+            console.error("Error converting to PNG:", e);
+            showNotification(
+              "Error creating PNG. Try downloading as SVG instead.",
+              "error"
+            );
+          }
+
+          // Clean up
+          URL.revokeObjectURL(url);
+        };
+
+        img.src = url;
+      });
+
     // List data files button
-    document.getElementById('list-data-files-btn').addEventListener('click', () => {
-      listDataFiles();
-    });
+    document
+      .getElementById("list-data-files-btn")
+      .addEventListener("click", () => {
+        listDataFiles();
+      });
   }
 
   // List available data files
   async function listDataFiles() {
     try {
-      const response = await fetch('/api/data-files');
-      
+      const response = await fetch("/api/data-files");
+
       if (!response.ok) {
-        throw new Error('Failed to fetch data files');
+        throw new Error("Failed to fetch data files");
       }
-      
+
       const result = await response.json();
-      
+
       if (result.files && result.files.length > 0) {
         showDataFilesModal(result.files);
       } else {
-        showNotification('No data files available', 'info');
+        showNotification("No data files available", "info");
       }
     } catch (error) {
-      console.error('Error listing data files:', error);
-      showNotification('Error fetching data files', 'error');
+      console.error("Error listing data files:", error);
+      showNotification("Error fetching data files", "error");
     }
   }
 
   // Show data files modal
   function showDataFilesModal(files) {
     // Create modal container if it doesn't exist
-    let modal = document.getElementById('data-files-modal');
+    let modal = document.getElementById("data-files-modal");
     if (!modal) {
-      modal = document.createElement('div');
-      modal.id = 'data-files-modal';
-      modal.className = 'modal';
+      modal = document.createElement("div");
+      modal.id = "data-files-modal";
+      modal.className = "modal";
       document.body.appendChild(modal);
     }
-    
+
     // Generate file list HTML
-    const fileListHtml = files.map(file => `
+    const fileListHtml = files
+      .map(
+        (file) => `
       <div class="data-file-item">
         <span class="file-name">${file.name}</span>
         <span class="file-size">${formatFileSize(file.size)}</span>
         <span class="file-date">${file.modified}</span>
         <button class="load-file-btn" data-filename="${file.name}">Load</button>
       </div>
-    `).join('');
-    
+    `
+      )
+      .join("");
+
     // Set modal content
     modal.innerHTML = `
       <div class="modal-content">
@@ -566,34 +596,36 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     `;
-    
+
     // Show modal
-    modal.style.display = 'block';
-    
+    modal.style.display = "block";
+
     // Add event listeners
-    modal.querySelector('.close-modal').addEventListener('click', () => {
-      modal.style.display = 'none';
+    modal.querySelector(".close-modal").addEventListener("click", () => {
+      modal.style.display = "none";
     });
-    
+
     // Close modal when clicking outside
-    window.addEventListener('click', (event) => {
+    window.addEventListener("click", (event) => {
       if (event.target === modal) {
-        modal.style.display = 'none';
+        modal.style.display = "none";
       }
     });
-    
+
     // Add load file button event listeners
-    const loadButtons = modal.querySelectorAll('.load-file-btn');
-    loadButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const filename = button.getAttribute('data-filename');
+    const loadButtons = modal.querySelectorAll(".load-file-btn");
+    loadButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const filename = button.getAttribute("data-filename");
         currentDataFile = filename;
-        
+
         // Close modal
-        modal.style.display = 'none';
-        
+        modal.style.display = "none";
+
         // Generate chart with selected file
-        const chartType = document.querySelector('input[name="chart-type"]:checked').value;
+        const chartType = document.querySelector(
+          'input[name="chart-type"]:checked'
+        ).value;
         generateChart(filename, chartType);
       });
     });
@@ -610,38 +642,42 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Show notification
-  function showNotification(message, type = 'info') {
+  function showNotification(message, type = "info") {
     // Create notification container if it doesn't exist
-    let notificationContainer = document.getElementById('notification-container');
+    let notificationContainer = document.getElementById(
+      "notification-container"
+    );
     if (!notificationContainer) {
-      notificationContainer = document.createElement('div');
-      notificationContainer.id = 'notification-container';
+      notificationContainer = document.createElement("div");
+      notificationContainer.id = "notification-container";
       document.body.appendChild(notificationContainer);
     }
-    
+
     // Create notification element
-    const notification = document.createElement('div');
+    const notification = document.createElement("div");
     notification.className = `notification ${type}`;
     notification.innerHTML = `
       <span class="notification-message">${message}</span>
       <span class="notification-close">&times;</span>
     `;
-    
+
     // Add to container
     notificationContainer.appendChild(notification);
-    
+
     // Add close button event listener
-    notification.querySelector('.notification-close').addEventListener('click', () => {
-      notification.classList.add('fade-out');
-      setTimeout(() => {
-        notificationContainer.removeChild(notification);
-      }, 300);
-    });
-    
+    notification
+      .querySelector(".notification-close")
+      .addEventListener("click", () => {
+        notification.classList.add("fade-out");
+        setTimeout(() => {
+          notificationContainer.removeChild(notification);
+        }, 300);
+      });
+
     // Auto-remove after 5 seconds
     setTimeout(() => {
       if (notification.parentNode === notificationContainer) {
-        notification.classList.add('fade-out');
+        notification.classList.add("fade-out");
         setTimeout(() => {
           if (notification.parentNode === notificationContainer) {
             notificationContainer.removeChild(notification);
@@ -653,7 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Add CSS for new components
   function addStyles() {
-    const styleElement = document.createElement('style');
+    const styleElement = document.createElement("style");
     styleElement.textContent = `
       /* Chart Controls */
       .chart-controls {
@@ -847,15 +883,15 @@ document.addEventListener('DOMContentLoaded', () => {
         to { opacity: 0; }
       }
     `;
-    
+
     document.head.appendChild(styleElement);
   }
-  
+
   // Add styles when DOM is loaded
   addStyles();
-  
+
   // Initialize SVG chart interactivity if SVG already exists
-  const existingSvg = chartPreview.querySelector('svg');
+  const existingSvg = chartPreview.querySelector("svg");
   if (existingSvg) {
     enhanceSvgInteractivity(existingSvg);
   }
@@ -866,133 +902,137 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 const SvgUtils = {
   // Add data attributes to SVG elements for better interactivity
-  enhanceSvgData: function(svgElement, data) {
+  enhanceSvgData: function (svgElement, data) {
     if (!svgElement || !data) return;
-    
+
     // For line charts - add data to circles
-    const circles = svgElement.querySelectorAll('circle');
+    const circles = svgElement.querySelectorAll("circle");
     if (circles.length > 0 && data.length >= circles.length) {
       circles.forEach((circle, index) => {
         if (data[index]) {
-          circle.setAttribute('data-value', data[index].value);
-          circle.setAttribute('data-category', data[index].category);
+          circle.setAttribute("data-value", data[index].value);
+          circle.setAttribute("data-category", data[index].category);
         }
       });
     }
-    
+
     // For bar charts - add data to rectangles
-    const rects = svgElement.querySelectorAll('rect.bar');
+    const rects = svgElement.querySelectorAll("rect.bar");
     if (rects.length > 0 && data.length >= rects.length) {
       rects.forEach((rect, index) => {
         if (data[index]) {
-          rect.setAttribute('data-value', data[index].value);
-          rect.setAttribute('data-category', data[index].category);
+          rect.setAttribute("data-value", data[index].value);
+          rect.setAttribute("data-category", data[index].category);
         }
       });
     }
   },
-  
+
   // Add zoom functionality to SVG
-  addZoomControls: function(svgElement) {
+  addZoomControls: function (svgElement) {
     if (!svgElement) return;
-    
+
     // Create zoom controls container
-    const zoomControls = document.createElement('div');
-    zoomControls.className = 'svg-zoom-controls';
+    const zoomControls = document.createElement("div");
+    zoomControls.className = "svg-zoom-controls";
     zoomControls.innerHTML = `
       <button class="zoom-in">+</button>
       <button class="zoom-out">-</button>
       <button class="zoom-reset">Reset</button>
     `;
-    
+
     // Insert controls before the SVG
     svgElement.parentNode.insertBefore(zoomControls, svgElement);
-    
+
     // Current zoom level
     let zoomLevel = 1;
     const zoomStep = 0.1;
     const maxZoom = 3;
     const minZoom = 0.5;
-    
+
     // Get the SVG viewBox
-    const originalViewBox = svgElement.getAttribute('viewBox');
-    
+    const originalViewBox = svgElement.getAttribute("viewBox");
+
     // Add event listeners
-    zoomControls.querySelector('.zoom-in').addEventListener('click', () => {
+    zoomControls.querySelector(".zoom-in").addEventListener("click", () => {
       if (zoomLevel < maxZoom) {
         zoomLevel += zoomStep;
         applyZoom();
       }
     });
-    
-    zoomControls.querySelector('.zoom-out').addEventListener('click', () => {
+
+    zoomControls.querySelector(".zoom-out").addEventListener("click", () => {
       if (zoomLevel > minZoom) {
         zoomLevel -= zoomStep;
         applyZoom();
       }
     });
-    
-    zoomControls.querySelector('.zoom-reset').addEventListener('click', () => {
+
+    zoomControls.querySelector(".zoom-reset").addEventListener("click", () => {
       zoomLevel = 1;
-      svgElement.setAttribute('viewBox', originalViewBox);
-      svgElement.style.transform = 'none';
+      svgElement.setAttribute("viewBox", originalViewBox);
+      svgElement.style.transform = "none";
     });
-    
+
     // Apply zoom function
     function applyZoom() {
       svgElement.style.transform = `scale(${zoomLevel})`;
-      svgElement.style.transformOrigin = 'center center';
+      svgElement.style.transformOrigin = "center center";
     }
   },
-  
+
   // Export SVG to various formats
   exportSvg: {
-    toSvgString: function(svgElement) {
+    toSvgString: function (svgElement) {
       if (!svgElement) return null;
       return new XMLSerializer().serializeToString(svgElement);
     },
-    
-    toDataUrl: function(svgElement) {
+
+    toDataUrl: function (svgElement) {
       if (!svgElement) return null;
       const svgString = this.toSvgString(svgElement);
-      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+      return (
+        "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString)
+      );
     },
-    
-    downloadAsSvg: function(svgElement, filename = 'chart.svg') {
+
+    downloadAsSvg: function (svgElement, filename = "chart.svg") {
       if (!svgElement) return;
-      
+
       const svgUrl = this.toDataUrl(svgElement);
-      const downloadLink = document.createElement('a');
+      const downloadLink = document.createElement("a");
       downloadLink.href = svgUrl;
       downloadLink.download = filename;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
     },
-    
-    toPngDataUrl: function(svgElement, callback) {
+
+    toPngDataUrl: function (svgElement, callback) {
       if (!svgElement) return null;
-      
+
       const svgString = this.toSvgString(svgElement);
-      const svgBlob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
+      const svgBlob = new Blob([svgString], {
+        type: "image/svg+xml;charset=utf-8",
+      });
       const url = URL.createObjectURL(svgBlob);
-      
+
       const img = new Image();
-      img.onload = function() {
-        const canvas = document.createElement('canvas');
+      img.onload = function () {
+        const canvas = document.createElement("canvas");
         canvas.width = svgElement.viewBox.baseVal.width || img.width;
         canvas.height = svgElement.viewBox.baseVal.height || img.height;
-        
-        const ctx = canvas.getContext('2d');
+
+        const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0);
-        
+
         URL.revokeObjectURL(url);
-        
-        const pngDataUrl = canvas.toDataURL('image/png');
+
+        const pngDataUrl = canvas.toDataURL("image/png");
         if (callback) callback(pngDataUrl);
       };
-      
+
       img.src = url;
-    }
-  }
+    },
+  },
 };
