@@ -78,5 +78,10 @@ func ParseDocumentToJSON(filePath string, outputPath string) error {
 		return fmt.Errorf("failed to encode JSON: %w", err)
 	}
 
+	err = FilterAndRewriteByUnit(outputPath)
+	if err != nil {
+		return fmt.Errorf("failed to filter and rewrite JSON: %w", err)
+	}
+
 	return nil
 }
