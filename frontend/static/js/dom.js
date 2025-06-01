@@ -2,13 +2,13 @@ const allowedMimeTypes = [
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "text/plain"
-  ];
-  
-  function validFileType(file) {
-    return allowedMimeTypes.includes(file.type);
-  }
+];
 
-export function displayFileInfo(file) {
+const validFileType = (file) => {
+    return allowedMimeTypes.includes(file.type);
+}
+
+export const displayFileInfo = (file) => {
     // Format file size
     const size = formatFileSize(file.size);
 
@@ -29,14 +29,14 @@ export function displayFileInfo(file) {
     `;
 }
 
-function formatFileSize(bytes) {
+const formatFileSize = (bytes) => {
     const sizes = ["Bytes", "KB", "MB", "GB"];
     if (bytes === 0) return "0 Byte";
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
 }
 
-function getFileIconType(file) {
+const getFileIconType = (file) => {
     const type = file.type || "";
     if (type.includes("pdf")) return "pdf-icon";
     if (type.includes("word")) return "docx-icon";
