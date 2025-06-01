@@ -4,7 +4,7 @@ const allowedMimeTypes = [
     "text/plain"
 ];
 
-const validFileType = (file) => {
+export const validFileType = (file) => {
     return allowedMimeTypes.includes(file.type);
 }
 
