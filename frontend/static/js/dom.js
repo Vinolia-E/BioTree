@@ -1,9 +1,44 @@
-export const dom = {
-  dropArea: document.getElementById("dropArea"),
-  fileInput: document.getElementById("document-upload"),
-  filePreview: document.getElementById("filePreview"),
-  chartPreview: document.getElementById("chartPreview"),
-  processBtn: document.getElementById("processBtn"),
-  chartOptions: document.querySelectorAll('input[name="chart-type"]'),
-  visualizationSection: document.querySelector(".visualization-section")
-};
+function validFileType(file) {
+    return (
+        fileTypes.includes(file.type) ||
+        file.name.endsWith(".pdf") ||
+        file.name.endsWith(".docx") ||
+        file.name.endsWith(".txt")
+    );
+}
+
+export function displayFileInfo(file) {
+    // Format file size
+    const size = formatFileSize(file.size);
+
+    // Get file icon based on type
+    const iconType = getFileIconType(file);
+
+    filePreview.innerHTML = `
+      <div class="file-metadata">
+        <div class="file-icon ${iconType}"></div>
+        <div class="file-info">
+          <p><strong>File name:</strong> ${file.name}</p>
+          <p><strong>File size:</strong> ${size}</p>
+          <p><strong>Last modified:</strong> ${new Date(
+        file.lastModified
+    ).toLocaleDateString()}</p>
+        </div>
+      </div>
+    `;
+}
+
+function formatFileSize(bytes) {
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    if (bytes === 0) return "0 Byte";
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
+}
+
+function getFileIconType(file) {
+    const type = file.type || "";
+    if (type.includes("pdf")) return "pdf-icon";
+    if (type.includes("word")) return "docx-icon";
+    if (type.includes("text")) return "txt-icon";
+    return "default-icon";
+}
