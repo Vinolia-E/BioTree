@@ -47,6 +47,12 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	inputPath := filepath.Join("files", filename)
 	outputPath := filepath.Join("data", filename+".json")
 
+	if inputPath == "" || outputPath == "" {
+		log.Println("Invalid file paths")
+		util.RespondError(w, "Invalid file paths")
+		return
+	}
+
 	// Save uploaded file
 	dst, err := os.Create(inputPath)
 	if err != nil {
