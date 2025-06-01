@@ -76,5 +76,5 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	util.RespondSuccess(w)
+	util.RespondSuccess(w, units)
 }
