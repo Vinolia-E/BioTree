@@ -27,10 +27,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     processBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        let formdata = new FormData();
-        formdata.append("document", doc);
-        let data = process(formdata);
-        console.log(data);
-    })
+    e.preventDefault();
+    const formdata = new FormData();
+    formdata.append("document", doc);
+
+    process(formdata).then((data) => {
+        if (data) {
+            console.log(data); 
+        }
+    }).catch((error) => {
+        console.error("Unexpected error:", error);
+    });
+});
+
 });
