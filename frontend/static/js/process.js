@@ -7,7 +7,17 @@ const process = async (form) => {
         }
     });
 
-    const data = await response.json();
+    if (!response.ok) {
+        return "";
+    }
 
-    return data;
+    let data = await response.json();
+
+    if (data.status == "error") {
+        alert(data.message);
+        return "";
+    }
+
+
+    return data.units;
 };
