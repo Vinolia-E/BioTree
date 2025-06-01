@@ -8,6 +8,7 @@ export const process = async (form) => {
     });
 
     if (!response.ok) {
+        alert("Error processing the document. Please try again.");
         return "";
     }
 
