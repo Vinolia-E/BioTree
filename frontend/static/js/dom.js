@@ -1,11 +1,12 @@
-function validFileType(file) {
-    return (
-        fileTypes.includes(file.type) ||
-        file.name.endsWith(".pdf") ||
-        file.name.endsWith(".docx") ||
-        file.name.endsWith(".txt")
-    );
-}
+const allowedMimeTypes = [
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain"
+  ];
+  
+  function validFileType(file) {
+    return allowedMimeTypes.includes(file.type);
+  }
 
 export function displayFileInfo(file) {
     // Format file size
