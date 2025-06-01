@@ -31,7 +31,6 @@ Example:
     { "value": 120.0, "unit": "vehicles/hr" }
   ]
 */
-
 func ParseDocumentToJSON(filePath string, outputPath string) error {
 	const chunkSize = 512
 	var allData []DataPoint
