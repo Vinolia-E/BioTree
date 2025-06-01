@@ -69,5 +69,12 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	units, err := util.GetUnitsFromFile(outputPath)
+	if err != nil {
+		log.Println("Failed to get units from file:", err)
+		util.RespondError(w, "Failed to get units from file: "+err.Error())
+		return
+	}
+
 	util.RespondSuccess(w)
 }
