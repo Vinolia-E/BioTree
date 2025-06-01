@@ -1,4 +1,4 @@
-const process = async (form) => {
+export const process = async (form) => {
     const response = await fetch("/upload", {
         method: "POST",
         body: form,
