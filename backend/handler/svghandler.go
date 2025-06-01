@@ -33,6 +33,7 @@ var (
 	validChartTypes = map[string]bool{
 		"line": true,
 		"bar":  true,
+		"pie":  true,
 	}
 
 	// Cache for generated SVGs
@@ -206,8 +207,12 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 		chartType = svgchart.Bar
 	case "line":
 		chartType = svgchart.Line
+	case "pie":
+		chartType = svgchart.Pie
 	default:
-		chartType = svgchart.Line
+		log.Printf("Invalid chart type requested: %s", req.ChartType)
+		util.RespondError(w, fmt.Sprintf("Invalid chart type: %s. Valid types are: line, bar, pie", req.ChartType))
+		return
 	}
 
 	// Generate the chart
