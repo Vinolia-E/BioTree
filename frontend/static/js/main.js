@@ -1,7 +1,12 @@
-import { initEventListeners } from './handlers.js';
-import { dom } from './dom.js';
+import { displayFileInfo } from './dom.js';
 
 document.addEventListener("DOMContentLoaded", () => {
-  dom.visualizationSection.style.display = "none";
-  initEventListeners();
+    const fileInput = document.getElementById("document-upload");
+
+    fileInput.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            displayFileInfo(file);
+        }
+    });
 });
