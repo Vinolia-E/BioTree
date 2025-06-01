@@ -13,8 +13,9 @@ func RespondError(w http.ResponseWriter, message string) {
 	})
 }
 
-func RespondSuccess(w http.ResponseWriter) {
-	json.NewEncoder(w).Encode(map[string]string{
+func RespondSuccess(w http.ResponseWriter, data any) {
+	json.NewEncoder(w).Encode(map[string]any{
 		"status": "ok",
+		"units":  data,
 	})
 }
