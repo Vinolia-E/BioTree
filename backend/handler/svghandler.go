@@ -48,6 +48,7 @@ var (
 // ChartRequest represents the request payload for chart generation
 type ChartRequest struct {
 	DataFile  string `json:"data_file"`
+	Unit      string `json:"unit,omitempty"`
 	ChartType string `json:"chart_type"`
 	Title     string `json:"title,omitempty"`
 	XLabel    string `json:"x_label,omitempty"`
@@ -87,7 +88,7 @@ func (r *ChartRequest) validate() error {
 	return nil
 }
 
-// GenerateChartHandler generates SVG charts from processed JSON data
+// GenerateChartHandler generates SVG charts from processed JSON data with optional unit filtering
 func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 	// Apply rate limiting
 	if !limiter.Allow() {
@@ -134,8 +135,8 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check cache first
-	cacheKey := fmt.Sprintf("%s-%s-%d-%d", req.DataFile, req.ChartType, req.Width, req.Height)
+	// Check cache first (include unit in cache key)
+	cacheKey := fmt.Sprintf("%s-%s-%s-%d-%d", req.DataFile, req.Unit, req.ChartType, req.Width, req.Height)
 	svgCache.RLock()
 	if item, ok := svgCache.items[cacheKey]; ok {
 		if time.Since(item.createdAt) < cacheExpiry {
@@ -144,6 +145,7 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 				"status": "ok",
 				"svg":    item.svg,
 				"type":   req.ChartType,
+				"unit":   req.Unit,
 				"cached": true,
 			})
 			return
@@ -151,7 +153,7 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	svgCache.RUnlock()
 
-	// Read the JSON data file
+	// Construct the full path to the data file
 	dataPath := filepath.Clean(filepath.Join("data", req.DataFile))
 	if !strings.HasPrefix(dataPath, filepath.Clean("data/")) {
 		log.Println("Path traversal attempt detected")
@@ -159,18 +161,49 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonData, err := os.ReadFile(dataPath)
-	if err != nil {
-		log.Println("Failed to read data file:", err)
-		util.RespondError(w, "Failed to read data file")
-		return
+	var dataPoints []util.DataPoint
+	var err error
+
+	// If unit is specified, filter data by unit
+	if req.Unit != "" {
+		// Use GetDataByUnitFromFile to filter data
+		filteredDataJSON, err := util.GetDataByUnitFromFile(dataPath, req.Unit)
+		if err != nil {
+			log.Printf("Failed to filter data by unit '%s': %v", req.Unit, err)
+			util.RespondError(w, "Failed to filter data by unit")
+			return
+		}
+
+		// Parse the filtered JSON data
+		if err := json.Unmarshal([]byte(filteredDataJSON), &dataPoints); err != nil {
+			log.Println("Failed to parse filtered JSON data:", err)
+			util.RespondError(w, "Invalid filtered data format")
+			return
+		}
+	} else {
+		// Read all data from the file
+		jsonData, err := os.ReadFile(dataPath)
+		if err != nil {
+			log.Println("Failed to read data file:", err)
+			util.RespondError(w, "Failed to read data file")
+			return
+		}
+
+		// Parse JSON data
+		if err := json.Unmarshal(jsonData, &dataPoints); err != nil {
+			log.Println("Failed to parse JSON data:", err)
+			util.RespondError(w, "Invalid data format")
+			return
+		}
 	}
 
-	// Parse JSON data
-	var dataPoints []util.DataPoint
-	if err := json.Unmarshal(jsonData, &dataPoints); err != nil {
-		log.Println("Failed to parse JSON data:", err)
-		util.RespondError(w, "Invalid data format")
+	// Check if we have data points
+	if len(dataPoints) == 0 {
+		message := "No data points found"
+		if req.Unit != "" {
+			message = fmt.Sprintf("No data points found for unit '%s'", req.Unit)
+		}
+		util.RespondError(w, message)
 		return
 	}
 
@@ -179,6 +212,9 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 
 	if req.Title != "" {
 		opts = append(opts, svgchart.WithTitle(req.Title))
+	} else if req.Unit != "" {
+		// Auto-generate title with unit if not provided
+		opts = append(opts, svgchart.WithTitle(fmt.Sprintf("Data for %s", req.Unit)))
 	}
 
 	if req.XLabel != "" {
@@ -187,16 +223,19 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 
 	if req.YLabel != "" {
 		opts = append(opts, svgchart.WithYLabel(req.YLabel))
+	} else if req.Unit != "" {
+		// Auto-generate Y-label with unit if not provided
+		opts = append(opts, svgchart.WithYLabel(req.Unit))
 	}
 
 	// Set dimensions (with defaults)
 	width := req.Width
 	if width == 0 {
-		width = 800
+		width = defaultWidth
 	}
 	height := req.Height
 	if height == 0 {
-		height = 400
+		height = defaultHeight
 	}
 	opts = append(opts, svgchart.WithDimensions(width, height))
 
@@ -235,10 +274,12 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Return the SVG content with compression
 	responseWithCompression(w, r, map[string]interface{}{
-		"status": "ok",
-		"svg":    svgContent,
-		"type":   req.ChartType,
-		"cached": false,
+		"status":     "ok",
+		"svg":        svgContent,
+		"type":       req.ChartType,
+		"unit":       req.Unit,
+		"data_count": len(dataPoints),
+		"cached":     false,
 	})
 }
 
@@ -270,10 +311,19 @@ func ListDataFilesHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		// Get units for this file
+		filePath := filepath.Join("data", file.Name())
+		units, err := util.GetUnitsFromFile(filePath)
+		if err != nil {
+			log.Printf("Failed to get units from file %s: %v", file.Name(), err)
+			units = []string{} // Empty slice if we can't read units
+		}
+
 		dataFiles = append(dataFiles, map[string]interface{}{
 			"name":     file.Name(),
 			"size":     info.Size(),
 			"modified": info.ModTime().Format("2006-01-02 15:04:05"),
+			"units":    units,
 		})
 	}
 
@@ -339,12 +389,6 @@ func ProcessAndGenerateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	// Get chart type from form
-	chartType := r.FormValue("chart_type")
-	if chartType == "" {
-		chartType = "line"
-	}
-
 	// Generate unique filename
 	filename := generateUniqueFilename(header.Filename)
 	inputPath := filepath.Join("files", filename)
@@ -364,52 +408,20 @@ func ProcessAndGenerateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Read the processed data
-	jsonData, err := os.ReadFile(outputPath)
+	// Get units from the processed file
+	units, err := util.GetUnitsFromFile(outputPath)
 	if err != nil {
-		log.Println("Failed to read processed data:", err)
-		util.RespondError(w, "Failed to read processed data")
+		log.Println("Failed to get units from processed file:", err)
+		util.RespondError(w, "Failed to extract units from processed data")
 		return
 	}
 
-	var dataPoints []util.DataPoint
-	if err := json.Unmarshal(jsonData, &dataPoints); err != nil {
-		log.Println("Failed to parse JSON data:", err)
-		util.RespondError(w, "Invalid processed data format")
-		return
-	}
-
-	// Generate chart
-	var svgChartType svgchart.ChartType
-	switch chartType {
-	case "bar":
-		svgChartType = svgchart.Bar
-	default:
-		svgChartType = svgchart.Line
-	}
-
-	opts := []svgchart.Option{
-		svgchart.WithDimensions(800, 400),
-		svgchart.WithTitle("Data Visualization"),
-		svgchart.WithXLabel("Categories"),
-		svgchart.WithYLabel("Values"),
-	}
-
-	chart, err := svgchart.New(dataPoints, svgChartType, opts...)
-	if err != nil {
-		log.Println("Failed to create chart:", err)
-		util.RespondError(w, "Failed to create chart")
-		return
-	}
-
-	svgContent := chart.Generate()
-
-	// Return success response with SVG
+	// Return success response with units and data file name
 	response := map[string]interface{}{
-		"status":     "ok",
-		"svg":        svgContent,
-		"chart_type": chartType,
-		"data_file":  filename + ".json",
+		"status":    "ok",
+		"units":     units,
+		"data_file": filename + ".json",
+		"message":   "Document processed successfully",
 	}
 
 	json.NewEncoder(w).Encode(response)
