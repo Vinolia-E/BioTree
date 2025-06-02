@@ -1,24 +1,57 @@
 export const process = async (form) => {
-    const response = await fetch("/upload", {
-        method: "POST",
-        body: form,
-        headers: {
-            "Accept": "application/json"
+    try {
+        console.log("Sending request to /upload...");
+        
+        const response = await fetch("/upload", {
+            method: "POST",
+            body: form,
+            headers: {
+                "Accept": "application/json"
+            }
+        });
+
+        console.log("Response status:", response.status);
+        console.log("Response headers:", response.headers);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Server response error:", errorText);
+            alert(`Error processing the document. Status: ${response.status}. Please try again.`);
+            return null;
         }
-    });
 
-    if (!response.ok) {
-        alert("Error processing the document. Please try again.");
-        return "";
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            const responseText = await response.text();
+            console.error("Non-JSON response:", responseText);
+            alert("Server returned invalid response format.");
+            return null;
+        }
+
+        let data = await response.json();
+        console.log("Parsed response data:", data);
+
+        if (data.status === "error") {
+            console.error("Server error:", data.message);
+            alert(data.message || "Server error occurred");
+            return null;
+        }
+
+        // Check if we have the expected structure
+        if (!data.units || !data.data_file) {
+            console.error("Missing expected fields in response:", data);
+            alert("Server response missing required data");
+            return null;
+        }
+
+        // Return both units and data file name for chart generation
+        return {
+            units: data.units,
+            dataFile: data.data_file
+        };
+    } catch (error) {
+        console.error("Network or parsing error:", error);
+        alert("Network error: " + error.message);
+        return null;
     }
-
-    let data = await response.json();
-
-    if (data.status == "error") {
-        alert(data.message);
-        return "";
-    }
-
-
-    return data.units;
 };
