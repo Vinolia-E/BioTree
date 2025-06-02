@@ -1,4 +1,4 @@
-import { showNotification } from "./notification";
+import { showNotification } from "./notification.js";
 
 export const process = async (form) => {
     try {
