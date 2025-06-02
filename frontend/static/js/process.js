@@ -1,3 +1,5 @@
+import { showNotification } from "./notification";
+
 export const process = async (form) => {
     try {
         console.log("Sending request to /upload...");
@@ -16,7 +18,7 @@ export const process = async (form) => {
         if (!response.ok) {
             const errorText = await response.text();
             console.error("Server response error:", errorText);
-            alert(`Error processing the document. Status: ${response.status}. Please try again.`);
+            showNotification(`Error processing the document. Status: ${response.status}. Please try again.`);
             return null;
         }
 
@@ -24,7 +26,7 @@ export const process = async (form) => {
         if (!contentType || !contentType.includes("application/json")) {
             const responseText = await response.text();
             console.error("Non-JSON response:", responseText);
-            alert("Server returned invalid response format.");
+            showNotification("Server returned invalid response format.");
             return null;
         }
 
@@ -33,14 +35,14 @@ export const process = async (form) => {
 
         if (data.status === "error") {
             console.error("Server error:", data.message);
-            alert(data.message || "Server error occurred");
+            showNotification(data.message || "Server error occurred");
             return null;
         }
 
         // Check if we have the expected structure
         if (!data.units || !data.data_file) {
             console.error("Missing expected fields in response:", data);
-            alert("Server response missing required data");
+            showNotification("Server response missing required data");
             return null;
         }
 
@@ -51,7 +53,7 @@ export const process = async (form) => {
         };
     } catch (error) {
         console.error("Network or parsing error:", error);
-        alert("Network error: " + error.message);
+        showNotification("Network error: " + error.message);
         return null;
     }
 };
