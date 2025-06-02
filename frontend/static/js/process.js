@@ -12,9 +12,6 @@ export const process = async (form) => {
             }
         });
 
-        console.log("Response status:", response.status);
-        console.log("Response headers:", response.headers);
-
         if (!response.ok) {
             const errorText = await response.text();
             console.error("Server response error:", errorText);
