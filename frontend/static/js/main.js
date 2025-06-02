@@ -1,5 +1,6 @@
 import { displayFileInfo, validFileType } from './file.js';
 import { process } from './process.js';
+import { showNotification } from "./notification";
 
 document.addEventListener("DOMContentLoaded", () => {
     const fileInput = document.getElementById("document-upload");
@@ -11,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const file = event.target.files[0];
 
         if (!validFileType(file)) {
-            alert("Invalid file type. Please upload a PDF, DOCX, or TXT file.");
+            showNotification("Invalid file type. Please upload a PDF, DOCX, or TXT file.");
             return;
         }
 
@@ -19,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
             displayFileInfo(file);
             doc = file;
         } else {
-            alert("No file selected. Please choose a file to upload.");
+            showNotification("No file selected. Please choose a file to upload.");
             return;
         }
 
@@ -30,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         
         if (!doc) {
-            alert("No file selected. Please choose a file first.");
+            showNotification("No file selected. Please choose a file first.");
             return;
         }
 
@@ -133,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const chartType = document.getElementById("chart-type").value;
 
         if (!selectedUnit) {
-            alert("Please select a unit first.");
+            showNotification("Please select a unit first.");
             return;
         }
 
@@ -186,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
             console.error("Error generating chart:", error);
-            alert("Error generating chart: " + error.message);
+            showNotification("Error generating chart: " + error.message);
         } finally {
             // Reset button state
             updateChartBtn.textContent = originalText;
@@ -197,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Function to download SVG
     function downloadSVG() {
         if (!window.currentSVG) {
-            alert("No chart available to download.");
+            showNotification("No chart available to download.");
             return;
         }
 
