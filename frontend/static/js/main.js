@@ -1,6 +1,6 @@
 import { displayFileInfo, validFileType } from './file.js';
 import { process } from './process.js';
-import { showNotification } from "./notification";
+import { showNotification } from "./notification.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const fileInput = document.getElementById("document-upload");
