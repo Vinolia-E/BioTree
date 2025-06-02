@@ -125,7 +125,7 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.ChartType == "" {
-		req.ChartType = "line" // default to line chart
+		req.ChartType = "line"
 	}
 
 	// Validate request
@@ -316,7 +316,7 @@ func ListDataFilesHandler(w http.ResponseWriter, r *http.Request) {
 		units, err := util.GetUnitsFromFile(filePath)
 		if err != nil {
 			log.Printf("Failed to get units from file %s: %v", file.Name(), err)
-			units = []string{} // Empty slice if we can't read units
+			units = []string{} // Empty slice if can't read units
 		}
 
 		dataFiles = append(dataFiles, map[string]interface{}{
