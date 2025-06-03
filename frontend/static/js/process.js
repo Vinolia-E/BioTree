@@ -2,7 +2,7 @@ import { showNotification } from './notification.js';
 
 export const process = async (form) => {
   try {
-    console.log('Sending request to /upload-page...');
+    console.log('Sending request to /upload...');
 
     const response = await fetch('/upload', {
       method: 'POST',
@@ -39,8 +39,8 @@ export const process = async (form) => {
     }
 
     // Check if we have the expected structure
-    if (!data.units || !data.data_file) {
-      console.error('Missing expected fields in response:', data);
+    if (!data.units) {
+      console.error('Missing units field in response:', data);
       showNotification('Server response missing required data');
       return null;
     }
@@ -48,7 +48,7 @@ export const process = async (form) => {
     // Return both units and data file name for chart generation
     return {
       units: data.units,
-      dataFile: data.data_file,
+      dataFile: data.data_file || `${Date.now()}.json`, // Fallback if data_file is missing
     };
   } catch (error) {
     console.error('Network or parsing error:', error);
