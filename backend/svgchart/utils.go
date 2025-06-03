@@ -29,7 +29,7 @@ func formatNumber(value float64) string {
 	if value == math.Floor(value) {
 		return fmt.Sprintf("%.0f", value)
 	}
-	
+
 	formatted := fmt.Sprintf("%.2f", value)
 	// Remove trailing zeros
 	formatted = strings.TrimRight(strings.TrimRight(formatted, "0"), ".")
@@ -47,9 +47,9 @@ func generateEmptyChart(options Options, message string) string {
 		options.Height/2,
 		message,
 		map[string]string{
-			"text-anchor":  "middle",
-			"font-family":  "Arial",
-			"font-size":    "14px",
+			"text-anchor": "middle",
+			"font-family": "Arial",
+			"font-size":   "14px",
 			"fill":        "#666666",
 		},
 	)

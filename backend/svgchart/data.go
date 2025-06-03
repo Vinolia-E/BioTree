@@ -8,15 +8,22 @@ import (
 	"github.com/Vinolia-E/BioTree/backend/util"
 )
 
+// DataPoint represents a single data point with a label and value
+type DataPoint struct {
+	Label string  `json:"label"`
+	Value float64 `json:"value"`
+	Unit  string  `json:"unit,omitempty"`
+}
+
 // ChartData represents the data to be visualized
-type ChartData []util.DataPoint
+type ChartData []DataPoint
 
 func ConvertData(data interface{}) (ChartData, error) {
 	switch d := data.(type) {
 	case map[string]float64:
 		return mapToDataPoints(d), nil
 	case []util.DataPoint:
-		return d, nil
+		return convertUtilDataPoints(d), nil
 	case []Point:
 		return pointsToDataPoints(d), nil
 	case [][]interface{}:
@@ -26,54 +33,72 @@ func ConvertData(data interface{}) (ChartData, error) {
 	}
 }
 
+func convertUtilDataPoints(data []util.DataPoint) ChartData {
+	result := make(ChartData, len(data))
+	for i, d := range data {
+		result[i] = DataPoint{
+			Label: fmt.Sprintf("%.2f %s", d.Value, d.Unit),
+			Value: d.Value,
+			Unit:  d.Unit,
+		}
+	}
+	return result
+}
+
 func mapToDataPoints(data map[string]float64) ChartData {
 	var points ChartData
 	for label, value := range data {
-		points = append(points, util.DataPoint{Unit: label, Value: value})
+		points = append(points, DataPoint{Label: label, Value: value})
 	}
 	sort.Slice(points, func(i, j int) bool {
-		return points[i].Unit < points[j].Unit
+		return points[i].Value < points[j].Value
 	})
 	return points
 }
 
 func pointsToDataPoints(points []Point) ChartData {
-	var data ChartData
+	var result ChartData
 	for _, p := range points {
-		data = append(data, util.DataPoint{Unit: p.X, Value: p.Y})
+		result = append(result, DataPoint{Label: p.X, Value: p.Y})
 	}
-	return data
+	return result
 }
 
 func sliceToDataPoints(data [][]interface{}) (ChartData, error) {
 	var points ChartData
-	for _, item := range data {
-		if len(item) < 2 {
-			continue
+	for _, row := range data {
+		if len(row) != 2 {
+			return nil, fmt.Errorf("each row must have exactly 2 values")
 		}
 
-		label, ok := item[0].(string)
+		// Get label
+		label, ok := row[0].(string)
 		if !ok {
-			label = fmt.Sprintf("%v", item[0])
+			label = fmt.Sprintf("%v", row[0])
 		}
 
+		// Get value
 		var value float64
-		switch v := item[1].(type) {
+		switch v := row[1].(type) {
 		case float64:
 			value = v
-		case int:
-			value = float64(v)
-		default:
-			strVal := fmt.Sprintf("%v", v)
-			val, err := strconv.ParseFloat(strVal, 64)
+		case string:
+			var err error
+			value, err = strconv.ParseFloat(v, 64)
 			if err != nil {
-				return nil, fmt.Errorf("invalid value type: %v", v)
+				return nil, fmt.Errorf("invalid value: %v", v)
 			}
-			value = val
+		default:
+			return nil, fmt.Errorf("unsupported value type: %T", v)
 		}
 
-		points = append(points, util.DataPoint{Unit: label, Value: value})
+		points = append(points, DataPoint{Label: label, Value: value})
 	}
+
+	sort.Slice(points, func(i, j int) bool {
+		return points[i].Value < points[j].Value
+	})
+
 	return points, nil
 }
 

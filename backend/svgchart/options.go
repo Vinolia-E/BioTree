@@ -5,15 +5,15 @@ type Option func(*Options)
 
 // Options contains all configurable chart options
 type Options struct {
-	Width      int
-	Height     int
-	Title      string
-	XLabel     string
-	YLabel     string
-	ShowGrid   bool
-	ChartType  ChartType
-	Colors     ColorScheme
-	Margins    Margins
+	Width     int
+	Height    int
+	Title     string
+	XLabel    string
+	YLabel    string
+	ShowGrid  bool
+	ChartType ChartType
+	Colors    ColorScheme
+	Margins   Margins
 }
 
 // ColorScheme defines the color palette for the chart

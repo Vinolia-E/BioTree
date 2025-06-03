@@ -1,10 +1,13 @@
 package svgchart
 
+import "fmt"
+
 type ChartType string
 
 const (
 	Line ChartType = "line"
 	Bar  ChartType = "bar"
+	Pie  ChartType = "pie"
 )
 
 type Chart interface {
@@ -26,7 +29,11 @@ func New(data interface{}, chartType ChartType, opts ...Option) (Chart, error) {
 	switch chartType {
 	case Bar:
 		return newBarChart(chartData, options), nil
-	default:
+	case Pie:
+		return newPieChart(chartData, options), nil
+	case Line:
 		return newLineChart(chartData, options), nil
+	default:
+		return nil, fmt.Errorf("unsupported chart type: %s", chartType)
 	}
 }

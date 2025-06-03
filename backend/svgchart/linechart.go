@@ -3,255 +3,123 @@ package svgchart
 import (
 	"fmt"
 	"math"
+	"strings"
 )
 
 // lineChart implements the Chart interface for line charts
 type lineChart struct {
-	data    ChartData
-	options Options
+	data     ChartData
+	options  Options
+	minValue float64
+	maxValue float64
+	padding  int
 }
 
 // newLineChart creates a new line chart instance
-func newLineChart(data ChartData, options Options) *lineChart {
-	return &lineChart{
+func newLineChart(data ChartData, options Options) Chart {
+	lc := &lineChart{
 		data:    data,
 		options: options,
+		padding: 40,
 	}
+
+	// Calculate min and max values
+	lc.minValue = math.MaxFloat64
+	lc.maxValue = -math.MaxFloat64
+	for _, d := range data {
+		if d.Value < lc.minValue {
+			lc.minValue = d.Value
+		}
+		if d.Value > lc.maxValue {
+			lc.maxValue = d.Value
+		}
+	}
+
+	// Add some padding to min/max
+	valueRange := lc.maxValue - lc.minValue
+	lc.minValue -= valueRange * 0.1
+	lc.maxValue += valueRange * 0.1
+
+	return lc
 }
 
 // Generate produces the SVG string for the line chart
 func (lc *lineChart) Generate() string {
 	if len(lc.data) == 0 {
-		return generateEmptyChart(lc.options, "No data available")
+		return ""
 	}
 
-	// Calculate chart dimensions
-	chartWidth := lc.options.Width - lc.options.Margins.Left - lc.options.Margins.Right
-	chartHeight := lc.options.Height - lc.options.Margins.Top - lc.options.Margins.Bottom
+	width := lc.options.Width
+	height := lc.options.Height
+	graphWidth := float64(width - (lc.padding * 2))
+	graphHeight := float64(height - (lc.padding * 2))
 
-	// Get min/max values for scaling
-	yMin, yMax := getYMinMax(lc.data)
+	// Create SVG with styles
+	svg := fmt.Sprintf(`<svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg">
+		<style>
+			.axis { stroke: #333; stroke-width: 1; }
+			.grid { stroke: #ccc; stroke-width: 0.5; stroke-dasharray: 4 2; }
+			.label { font-family: Arial; font-size: 12px; }
+			.title { font-family: Arial; font-size: 16px; font-weight: bold; }
+			.data-point { fill: #4285f4; }
+			.data-line { stroke: #4285f4; stroke-width: 2; fill: none; }
+			.data-point:hover { fill: #2962ff; r: 6; }
+		</style>`, width, height)
 
-	if yMin == yMax {
-		padding := math.Max(1, yMin*0.1)
-		if yMin == 0 {
-			padding = 1
-		}
-		yMin -= padding
-		yMax += padding
-	}
-
-	sb := NewSVGBuilder(lc.options.Width, lc.options.Height)
-
-	// Background
-	sb.AddRect(0, 0, lc.options.Width, lc.options.Height, map[string]string{
-		"fill": lc.options.Colors.Background,
-	})
-
-	// Add title if provided
+	// Add title if present
 	if lc.options.Title != "" {
-		sb.AddText(lc.options.Width/2, 20, lc.options.Title, map[string]string{
-			"text-anchor": "middle",
-			"font-family": "Arial",
-			"font-size":   "16px",
-			"font-weight": "bold",
-			"fill":        lc.options.Colors.Title,
-		})
+		svg += fmt.Sprintf(`<text x="%d" y="%d" text-anchor="middle" class="title">%s</text>`,
+			width/2, lc.padding/2, lc.options.Title)
 	}
 
-	if lc.options.ShowGrid {
-		lc.addGrid(sb, chartWidth, chartHeight)
+	// Draw axes
+	svg += fmt.Sprintf(`<line x1="%d" y1="%d" x2="%d" y2="%d" class="axis"/>`, // y-axis
+		lc.padding, lc.padding, lc.padding, height-lc.padding)
+	svg += fmt.Sprintf(`<line x1="%d" y1="%d" x2="%d" y2="%d" class="axis"/>`, // x-axis
+		lc.padding, height-lc.padding, width-lc.padding, height-lc.padding)
+
+	// Draw grid and y-axis labels
+	numGridLines := 5
+	for i := 0; i <= numGridLines; i++ {
+		y := float64(lc.padding) + (graphHeight * float64(i) / float64(numGridLines))
+		value := lc.maxValue - ((lc.maxValue - lc.minValue) * float64(i) / float64(numGridLines))
+
+		// Grid line
+		svg += fmt.Sprintf(`<line x1="%d" y1="%f" x2="%d" y2="%f" class="grid"/>`,
+			lc.padding, y, width-lc.padding, y)
+
+		// Y-axis label
+		svg += fmt.Sprintf(`<text x="%d" y="%f" text-anchor="end" alignment-baseline="middle" class="label">%.1f</text>`,
+			lc.padding-5, y, value)
 	}
 
-	lc.addAxes(sb, chartWidth, chartHeight, yMin, yMax)
+	// Generate line path
+	points := make([]string, len(lc.data))
+	for i, d := range lc.data {
+		// Calculate point position
+		x := float64(lc.padding) + (float64(i) * graphWidth / float64(len(lc.data)-1))
+		heightRatio := (d.Value - lc.minValue) / (lc.maxValue - lc.minValue)
+		y := float64(height-lc.padding) - (heightRatio * graphHeight)
 
-	// Add axis labels if provided
-	if lc.options.XLabel != "" {
-		sb.AddText(
-			lc.options.Margins.Left+chartWidth/2,
-			lc.options.Height-10,
-			lc.options.XLabel,
-			map[string]string{
-				"text-anchor": "middle",
-				"font-family": "Arial",
-				"font-size":   "12px",
-				"fill":        lc.options.Colors.Text,
-			},
-		)
+		// Add point to path
+		points[i] = fmt.Sprintf("%f,%f", x, y)
+
+		// Add data point circle
+		svg += fmt.Sprintf(`<circle cx="%f" cy="%f" r="4" class="data-point">
+			<title>%s: %.2f</title>
+		</circle>`,
+			x, y, d.Label, d.Value)
+
+		// X-axis label
+		svg += fmt.Sprintf(`<text x="%f" y="%d" text-anchor="middle" transform="rotate(45 %f,%d)" class="label">%s</text>`,
+			x, height-lc.padding+5, x, height-lc.padding+5, d.Label)
 	}
 
-	if lc.options.YLabel != "" {
-		sb.AddText(
-			15,
-			lc.options.Margins.Top+chartHeight/2,
-			lc.options.YLabel,
-			map[string]string{
-				"text-anchor": "middle",
-				"font-family": "Arial",
-				"font-size":   "12px",
-				"fill":        lc.options.Colors.Text,
-				"transform":   fmt.Sprintf("rotate(-90, 15, %d)", lc.options.Margins.Top+chartHeight/2),
-			},
-		)
-	}
+	// Draw line connecting points
+	svg += fmt.Sprintf(`<path d="M%s" class="data-line"/>`, strings.Join(points, " L"))
 
-	lc.addLinePath(sb, chartWidth, chartHeight, yMin, yMax)
+	// Close SVG
+	svg += "</svg>"
 
-	return sb.String()
-}
-
-func (lc *lineChart) addGrid(sb *SVGBuilder, chartWidth, chartHeight int) {
-	numLines := 5
-	for i := 0; i <= numLines; i++ {
-		yPos := lc.options.Margins.Top + chartHeight - (i * chartHeight / numLines)
-		sb.AddLine(
-			lc.options.Margins.Left,
-			yPos,
-			lc.options.Margins.Left+chartWidth,
-			yPos,
-			map[string]string{
-				"stroke":           lc.options.Colors.Grid,
-				"stroke-width":     "1",
-				"stroke-dasharray": "5,5",
-			},
-		)
-	}
-}
-
-func (lc *lineChart) addAxes(sb *SVGBuilder, chartWidth, chartHeight int, yMin, yMax float64) {
-	m := lc.options.Margins
-
-	// X-axis
-	sb.AddLine(
-		m.Left,
-		m.Top+chartHeight,
-		m.Left+chartWidth,
-		m.Top+chartHeight,
-		map[string]string{
-			"stroke":       lc.options.Colors.Axis,
-			"stroke-width": "2",
-		},
-	)
-
-	// Y-axis
-	sb.AddLine(
-		m.Left,
-		m.Top,
-		m.Left,
-		m.Top+chartHeight,
-		map[string]string{
-			"stroke":       lc.options.Colors.Axis,
-			"stroke-width": "2",
-		},
-	)
-
-	// X-axis labels
-	numLabels := 7
-	if len(lc.data) < numLabels {
-		numLabels = len(lc.data)
-	}
-
-	if numLabels > 0 {
-		step := 1
-		if len(lc.data) > numLabels {
-			step = len(lc.data) / numLabels
-		}
-
-		for i := 0; i < len(lc.data); i += step {
-			if i >= len(lc.data) {
-				break
-			}
-
-			var xPos int
-			if len(lc.data) == 1 {
-				xPos = m.Left + chartWidth/2
-			} else {
-				xPos = m.Left + (i * chartWidth / (len(lc.data) - 1))
-			}
-
-			sb.AddText(
-				xPos,
-				m.Top+chartHeight+15,
-				lc.data[i].Unit,
-				map[string]string{
-					"text-anchor": "middle",
-					"font-family": "Arial",
-					"font-size":   "10px",
-					"fill":        lc.options.Colors.Text,
-				},
-			)
-		}
-	}
-
-	// Y-axis labels
-	numYLabels := 5
-	for i := 0; i <= numYLabels; i++ {
-		yValue := yMin + float64(i)*(yMax-yMin)/float64(numYLabels)
-		yPos := m.Top + chartHeight - int(float64(i)*float64(chartHeight)/float64(numYLabels))
-
-		yLabel := formatNumber(yValue)
-
-		sb.AddText(
-			m.Left-5,
-			yPos+3,
-			yLabel,
-			map[string]string{
-				"text-anchor": "end",
-				"font-family": "Arial",
-				"font-size":   "10px",
-				"fill":        lc.options.Colors.Text,
-			},
-		)
-	}
-}
-
-func (lc *lineChart) addLinePath(sb *SVGBuilder, chartWidth, chartHeight int, yMin, yMax float64) {
-	var points []struct{ x, y int }
-	for i, dp := range lc.data {
-		var xPos int
-		if len(lc.data) == 1 {
-			xPos = lc.options.Margins.Left + chartWidth/2
-		} else {
-			xPos = lc.options.Margins.Left + (i * chartWidth / (len(lc.data) - 1))
-		}
-
-		var yScaled float64
-		if yMax == yMin {
-			yScaled = float64(chartHeight) / 2
-		} else {
-			yScaled = ((dp.Value - yMin) / (yMax - yMin)) * float64(chartHeight)
-		}
-
-		yPos := lc.options.Margins.Top + (chartHeight - int(yScaled))
-		points = append(points, struct{ x, y int }{xPos, yPos})
-	}
-
-	// Create line path
-	if len(points) > 0 {
-		path := fmt.Sprintf("M%d,%d ", points[0].x, points[0].y)
-		for i := 1; i < len(points); i++ {
-			path += fmt.Sprintf("L%d,%d ", points[i].x, points[i].y)
-		}
-
-		sb.AddPath(
-			path,
-			map[string]string{
-				"fill":         "none",
-				"stroke":       lc.options.Colors.Line,
-				"stroke-width": "2",
-			},
-		)
-
-		// Add points
-		for _, p := range points {
-			sb.AddCircle(
-				p.x,
-				p.y,
-				4,
-				map[string]string{
-					"fill": lc.options.Colors.Line,
-				},
-			)
-		}
-	}
+	return svg
 }

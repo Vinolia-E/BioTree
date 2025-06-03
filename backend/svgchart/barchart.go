@@ -9,225 +9,121 @@ import (
 type barChart struct {
 	data    ChartData
 	options Options
+	// Calculated values
+	minValue float64
+	maxValue float64
+	padding  int
+	barWidth float64
 }
 
 // newBarChart creates a new bar chart instance
-func newBarChart(data ChartData, options Options) *barChart {
-	return &barChart{
+func newBarChart(data ChartData, options Options) Chart {
+	bc := &barChart{
 		data:    data,
 		options: options,
+		padding: 40,
 	}
+
+	// Calculate min and max values
+	bc.minValue = math.MaxFloat64
+	bc.maxValue = -math.MaxFloat64
+	for _, d := range data {
+		if d.Value < bc.minValue {
+			bc.minValue = d.Value
+		}
+		if d.Value > bc.maxValue {
+			bc.maxValue = d.Value
+		}
+	}
+
+	// Add some padding to min/max
+	valueRange := bc.maxValue - bc.minValue
+	bc.minValue = math.Max(0, bc.minValue-valueRange*0.1) // Don't go below 0 for bar charts
+	bc.maxValue += valueRange * 0.1
+
+	// Calculate bar width
+	graphWidth := float64(options.Width - (bc.padding * 2))
+	bc.barWidth = (graphWidth / float64(len(data))) * 0.8 // Leave 20% gap between bars
+
+	return bc
 }
 
 // Generate produces the SVG string for the bar chart
-func (bc *barChart) Generate() string {
-	if len(bc.data) == 0 {
-		return generateEmptyChart(bc.options, "No data available")
+func (b *barChart) Generate() string {
+	if len(b.data) == 0 {
+		return ""
 	}
 
-	// Calculate chart dimensions
-	chartWidth := bc.options.Width - bc.options.Margins.Left - bc.options.Margins.Right
-	chartHeight := bc.options.Height - bc.options.Margins.Top - bc.options.Margins.Bottom
+	width := b.options.Width
+	height := b.options.Height
+	graphWidth := float64(width - (b.padding * 2))
+	graphHeight := float64(height - (b.padding * 2))
 
-	// Get min/max values for scaling
-	yMin, yMax := getYMinMax(bc.data)
+	// Create SVG with styles
+	svg := fmt.Sprintf(`<svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg">
+		<style>
+			.axis { stroke: #333; stroke-width: 1; }
+			.grid { stroke: #ccc; stroke-width: 0.5; stroke-dasharray: 4 2; }
+			.label { font-family: Arial; font-size: 12px; }
+			.title { font-family: Arial; font-size: 16px; font-weight: bold; }
+			.bar { fill: #4285f4; transition: fill 0.3s; }
+			.bar:hover { fill: #2962ff; }
+			.value-label { font-family: Arial; font-size: 12px; fill: #333; }
+		</style>`, width, height)
 
-	// Handle uniform values
-	if yMin == yMax {
-		padding := math.Max(1, yMin*0.1)
-		if yMin == 0 {
-			padding = 1
-		}
-		yMin -= padding
-		yMax += padding
+	// Add title if present
+	if b.options.Title != "" {
+		svg += fmt.Sprintf(`<text x="%d" y="%d" text-anchor="middle" class="title">%s</text>`,
+			width/2, b.padding/2, b.options.Title)
 	}
 
-	sb := NewSVGBuilder(bc.options.Width, bc.options.Height)
+	// Draw axes
+	svg += fmt.Sprintf(`<line x1="%d" y1="%d" x2="%d" y2="%d" class="axis"/>`, // y-axis
+		b.padding, b.padding, b.padding, height-b.padding)
+	svg += fmt.Sprintf(`<line x1="%d" y1="%d" x2="%d" y2="%d" class="axis"/>`, // x-axis
+		b.padding, height-b.padding, width-b.padding, height-b.padding)
 
-	// Background
-	sb.AddRect(0, 0, bc.options.Width, bc.options.Height, map[string]string{
-		"fill": bc.options.Colors.Background,
-	})
+	// Draw grid and y-axis labels
+	numGridLines := 5
+	for i := 0; i <= numGridLines; i++ {
+		y := float64(b.padding) + (graphHeight * float64(i) / float64(numGridLines))
+		value := b.maxValue - ((b.maxValue - b.minValue) * float64(i) / float64(numGridLines))
 
-	// Add title if provided
-	if bc.options.Title != "" {
-		sb.AddText(bc.options.Width/2, 20, bc.options.Title, map[string]string{
-			"text-anchor": "middle",
-			"font-family": "Arial",
-			"font-size":   "16px",
-			"font-weight": "bold",
-			"fill":        bc.options.Colors.Title,
-		})
+		// Grid line
+		svg += fmt.Sprintf(`<line x1="%d" y1="%f" x2="%d" y2="%f" class="grid"/>`,
+			b.padding, y, width-b.padding, y)
+
+		// Y-axis label
+		svg += fmt.Sprintf(`<text x="%d" y="%f" text-anchor="end" alignment-baseline="middle" class="label">%.1f</text>`,
+			b.padding-5, y, value)
 	}
 
-	if bc.options.ShowGrid {
-		bc.addGrid(sb, chartWidth, chartHeight)
+	// Generate bars
+	spacing := (graphWidth - (float64(len(b.data)) * b.barWidth)) / float64(len(b.data)+1)
+	for i, d := range b.data {
+		// Calculate bar position and height
+		x := float64(b.padding) + spacing + (float64(i) * (b.barWidth + spacing))
+		heightRatio := (d.Value - b.minValue) / (b.maxValue - b.minValue)
+		barHeight := heightRatio * float64(graphHeight)
+		y := float64(height-b.padding) - barHeight
+
+		// Draw bar
+		svg += fmt.Sprintf(`<rect x="%f" y="%f" width="%f" height="%f" class="bar">
+			<title>%s: %.2f</title>
+		</rect>`,
+			x, y, b.barWidth, barHeight, d.Label, d.Value)
+
+		// Add value label on top of bar
+		svg += fmt.Sprintf(`<text x="%f" y="%f" text-anchor="middle" class="value-label">%.1f</text>`,
+			x+b.barWidth/2, y-5, d.Value)
+
+		// X-axis label
+		svg += fmt.Sprintf(`<text x="%f" y="%d" text-anchor="middle" transform="rotate(45 %f,%d)" class="label">%s</text>`,
+			x+b.barWidth/2, height-b.padding+5, x+b.barWidth/2, height-b.padding+5, d.Label)
 	}
 
-	bc.addAxes(sb, chartWidth, chartHeight, yMin, yMax)
+	// Close SVG
+	svg += "</svg>"
 
-	// Add axis labels if provided
-	if bc.options.XLabel != "" {
-		sb.AddText(
-			bc.options.Margins.Left+chartWidth/2,
-			bc.options.Height-10,
-			bc.options.XLabel,
-			map[string]string{
-				"text-anchor": "middle",
-				"font-family": "Arial",
-				"font-size":   "12px",
-				"fill":        bc.options.Colors.Text,
-			},
-		)
-	}
-
-	if bc.options.YLabel != "" {
-		sb.AddText(
-			15,
-			bc.options.Margins.Top+chartHeight/2,
-			bc.options.YLabel,
-			map[string]string{
-				"text-anchor": "middle",
-				"font-family": "Arial",
-				"font-size":   "12px",
-				"fill":        bc.options.Colors.Text,
-				"transform":   fmt.Sprintf("rotate(-90, 15, %d)", bc.options.Margins.Top+chartHeight/2),
-			},
-		)
-	}
-
-	bc.addBars(sb, chartWidth, chartHeight, yMin, yMax)
-
-	return sb.String()
-}
-
-func (bc *barChart) addGrid(sb *SVGBuilder, chartWidth, chartHeight int) {
-	numLines := 5
-	for i := 0; i <= numLines; i++ {
-		yPos := bc.options.Margins.Top + chartHeight - (i * chartHeight / numLines)
-		sb.AddLine(
-			bc.options.Margins.Left,
-			yPos,
-			bc.options.Margins.Left+chartWidth,
-			yPos,
-			map[string]string{
-				"stroke":           bc.options.Colors.Grid,
-				"stroke-width":     "1",
-				"stroke-dasharray": "5,5",
-			},
-		)
-	}
-}
-
-func (bc *barChart) addAxes(sb *SVGBuilder, chartWidth, chartHeight int, yMin, yMax float64) {
-	m := bc.options.Margins
-
-	// X-axis
-	sb.AddLine(
-		m.Left,
-		m.Top+chartHeight,
-		m.Left+chartWidth,
-		m.Top+chartHeight,
-		map[string]string{
-			"stroke":       bc.options.Colors.Axis,
-			"stroke-width": "2",
-		},
-	)
-
-	// Y-axis
-	sb.AddLine(
-		m.Left,
-		m.Top,
-		m.Left,
-		m.Top+chartHeight,
-		map[string]string{
-			"stroke":       bc.options.Colors.Axis,
-			"stroke-width": "2",
-		},
-	)
-
-	// X-axis labels
-	numLabels := 7
-	if len(bc.data) < numLabels {
-		numLabels = len(bc.data)
-	}
-
-	if numLabels > 0 {
-		step := 1
-		if len(bc.data) > numLabels {
-			step = len(bc.data) / numLabels
-		}
-
-		for i := 0; i < len(bc.data); i += step {
-			if i >= len(bc.data) {
-				break
-			}
-
-			xPos := m.Left + int((float64(i)+0.5)*(float64(chartWidth)/float64(len(bc.data))))
-			sb.AddText(
-				xPos,
-				m.Top+chartHeight+15,
-				bc.data[i].Unit,
-				map[string]string{
-					"text-anchor": "middle",
-					"font-family": "Arial",
-					"font-size":   "10px",
-					"fill":        bc.options.Colors.Text,
-				},
-			)
-		}
-	}
-
-	// Y-axis labels
-	numYLabels := 5
-	for i := 0; i <= numYLabels; i++ {
-		yValue := yMin + float64(i)*(yMax-yMin)/float64(numYLabels)
-		yPos := m.Top + chartHeight - int(float64(i)*float64(chartHeight)/float64(numYLabels))
-
-		yLabel := formatNumber(yValue)
-
-		sb.AddText(
-			m.Left-5,
-			yPos+3,
-			yLabel,
-			map[string]string{
-				"text-anchor": "end",
-				"font-family": "Arial",
-				"font-size":   "10px",
-				"fill":        bc.options.Colors.Text,
-			},
-		)
-	}
-}
-
-func (bc *barChart) addBars(sb *SVGBuilder, chartWidth, chartHeight int, yMin, yMax float64) {
-	barWidth := float64(chartWidth) / float64(len(bc.data)) * 0.8
-	gapWidth := float64(chartWidth) / float64(len(bc.data)) * 0.2
-
-	for i, dp := range bc.data {
-		// Calculate position
-		xPos := float64(bc.options.Margins.Left) + (float64(i) * float64(chartWidth) / float64(len(bc.data))) + gapWidth/2
-
-		// Scale y value
-		var barHeight float64
-		if yMax == yMin {
-			barHeight = float64(chartHeight) / 2
-		} else {
-			yScaled := ((dp.Value - yMin) / (yMax - yMin)) * float64(chartHeight)
-			barHeight = yScaled
-		}
-
-		yPos := float64(bc.options.Margins.Top) + float64(chartHeight) - barHeight
-
-		sb.AddRect(
-			int(xPos),
-			int(yPos),
-			int(barWidth),
-			int(barHeight),
-			map[string]string{
-				"fill":   bc.options.Colors.Bar,
-				"stroke": "none",
-			},
-		)
-	}
+	return svg
 }
