@@ -23,7 +23,7 @@ func InitRoutes() *http.ServeMux {
 
 	// Serve the upload page
 	r.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "frontend/templates/index.html")
+		http.ServeFile(w, r, "frontend/templates/upload.html")
 	})
 
 	// Serve the about page
