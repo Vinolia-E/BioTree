@@ -5,17 +5,27 @@ import (
 	"net/http"
 )
 
+// RespondError sends an error response to the client
 func RespondError(w http.ResponseWriter, message string) {
-	w.WriteHeader(http.StatusInternalServerError)
-	json.NewEncoder(w).Encode(map[string]string{
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+
+	response := map[string]interface{}{
 		"status":  "error",
 		"message": message,
-	})
+	}
+
+	json.NewEncoder(w).Encode(response)
 }
 
-func RespondSuccess(w http.ResponseWriter, data any) {
-	json.NewEncoder(w).Encode(map[string]any{
+// RespondSuccess sends a success response to the client
+func RespondSuccess(w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+
+	response := map[string]interface{}{
 		"status": "ok",
-		"units":  data,
-	})
+		"data":   data,
+	}
+
+	json.NewEncoder(w).Encode(response)
 }
