@@ -608,60 +608,77 @@ button:disabled {
   font-style: italic;
 }
 
-/* User Documents Section */
-.user-documents-section {
-  margin-top: 40px;
-  margin-bottom: 40px;
+/* Page Layout */
+.page-layout {
+  display: flex;
+  gap: 30px;
+  margin-top: 20px;
 }
 
-.user-documents-section h3 {
+.main-content {
+  flex: 1;
+  min-width: 0; /* Prevents flex items from overflowing */
+}
+
+/* Documents Sidebar */
+.documents-sidebar {
+  width: 350px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  align-self: flex-start;
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+}
+
+.documents-sidebar h3 {
+  margin-top: 0;
   margin-bottom: 20px;
   color: #2c3e50;
-  font-size: 22px;
-  border-bottom: 1px solid #eee;
+  font-size: 20px;
+  border-bottom: 1px solid #e1e4e8;
   padding-bottom: 10px;
 }
 
-.documents-grid {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+.documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .document-item {
   background-color: white;
   border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .document-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .document-info {
-  flex: 1;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .document-name {
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
   color: #2c3e50;
   font-size: 16px;
   word-break: break-word;
+  font-weight: 600;
 }
 
 .document-meta {
   color: #7f8c8d;
-  font-size: 14px;
+  font-size: 13px;
   margin: 0;
+  line-height: 1.4;
 }
 
 .units-count {
@@ -676,19 +693,19 @@ button:disabled {
 
 .document-actions {
   display: flex;
-  gap: 10px;
-  margin-top: auto;
+  gap: 8px;
 }
 
 .view-btn,
 .generate-chart-btn {
   flex: 1;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: none;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   transition: background-color 0.3s;
+  text-align: center;
 }
 
 .view-btn {
@@ -718,16 +735,30 @@ button:disabled {
   text-align: center;
   color: #7f8c8d;
   font-style: italic;
-  padding: 30px;
+  padding: 20px;
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .loading-message {
   text-align: center;
   color: #7f8c8d;
-  padding: 20px;
+  padding: 15px;
+}
+
+/* Responsive layout */
+@media (max-width: 900px) {
+  .page-layout {
+    flex-direction: column;
+  }
+  
+  .documents-sidebar {
+    width: 100%;
+    position: static;
+    max-height: none;
+    margin-top: 30px;
+  }
 }
 
 /* Modal Styles */
