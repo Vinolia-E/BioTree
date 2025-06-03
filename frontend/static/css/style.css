@@ -482,3 +482,128 @@ button:disabled {
     margin: 0 10px;
   }
 }
+
+/* Control groups and form styling */
+.control-group {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.control-group h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #2c3e50;
+  font-size: 18px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.control-row label {
+  flex: 0 0 120px;
+  font-weight: 500;
+  color: #555;
+}
+
+.control-row input,
+.control-row select {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.control-row input:focus,
+.control-row select:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.control-row input[type="number"] {
+  width: 100px;
+}
+
+/* Button styling */
+.primary-button,
+.secondary-button,
+#update-chart-btn,
+#download-svg-btn,
+#reset-chart-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.primary-button,
+#update-chart-btn {
+  background-color: #3498db;
+  color: white;
+  margin-top: 10px;
+}
+
+.primary-button:hover,
+#update-chart-btn:hover {
+  background-color: #2980b9;
+}
+
+.secondary-button,
+#download-svg-btn,
+#reset-chart-btn {
+  background-color: #ecf0f1;
+  color: #34495e;
+  margin-right: 10px;
+}
+
+.secondary-button:hover,
+#download-svg-btn:hover,
+#reset-chart-btn:hover {
+  background-color: #dde4e6;
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
+}
+
+/* Chart display area */
+.chart-display-area,
+#chart-container {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-display-area:empty,
+#chart-container:empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-display-area:empty::before,
+#chart-container:empty::before {
+  content: "Chart will appear here after generation";
+  color: #999;
+  font-style: italic;
+}
