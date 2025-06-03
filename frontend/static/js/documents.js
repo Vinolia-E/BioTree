@@ -273,7 +273,10 @@ async function updateChart(fileName) {
       height: parseInt(document.getElementById('chart-height').value)
     };
     
-    const response = await fetch('/generate-chart', {
+    console.log('Sending chart request:', chartRequest);
+    
+    // Use the API endpoint instead of the legacy endpoint
+    const response = await fetch('/api/generate-chart', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -283,6 +286,8 @@ async function updateChart(fileName) {
     });
     
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Server error response:', errorText);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
