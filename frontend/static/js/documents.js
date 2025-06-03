@@ -32,7 +32,7 @@ export function displayUserDocuments(documents) {
   // Sort documents by modified date (newest first)
   documents.sort((a, b) => new Date(b.modified) - new Date(a.modified));
   
-  let html = '<ul class="documents-grid">';
+  let html = '';
   
   documents.forEach(doc => {
     const fileName = doc.name;
@@ -43,7 +43,7 @@ export function displayUserDocuments(documents) {
       : '<span class="units-count">No units</span>';
     
     html += `
-      <li class="document-item">
+      <div class="document-item">
         <div class="document-info">
           <h4 class="document-name">${fileName}</h4>
           <p class="document-meta">
@@ -52,16 +52,15 @@ export function displayUserDocuments(documents) {
           </p>
         </div>
         <div class="document-actions">
-          <button class="view-btn" data-filename="${fileName}">View Content</button>
+          <button class="view-btn" data-filename="${fileName}">View</button>
           <button class="generate-chart-btn" data-filename="${fileName}" ${doc.units.length === 0 ? 'disabled' : ''}>
-            Generate Chart
+            Chart
           </button>
         </div>
-      </li>
+      </div>
     `;
   });
   
-  html += '</ul>';
   documentsList.innerHTML = html;
   
   // Add event listeners to buttons
