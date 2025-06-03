@@ -1,91 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BioTree - Home</title>
-  <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-  <header class="site-header">
-    <div class="container header-container">
-      <div class="logo">
-        <a href="/"><h1>BioTree</h1></a>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BioTree - Home</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-container">
+        <div class="logo">
+          <a href="/"><h1>BioTree</h1></a>
+        </div>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="/" class="active">Home</a></li>
+            <li><a href="/upload-page">Upload</a></li>
+            <li><a href="/about">About</a></li>
+          </ul>
+        </nav>
       </div>
-      <nav class="main-nav">
-        <ul>
-          <li><a href="/" class="active">Home</a></li>
-          <li><a href="/upload">Upload</a></li>
-          <li><a href="/about">About</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
+    </header>
 
-  <main class="container">
-    <section class="hero-section">
-      <div class="hero-content">
-        <h2>Transform Your Documents into Dynamic Visualizations</h2>
-        <p>BioTree helps you convert PDF, DOCX, and TXT files into beautiful, interactive charts and visualizations.</p>
-        <a href="/upload" class="cta-button">Get Started</a>
-      </div>
-      <div class="hero-image">
-        <img src="/static/images/chart-illustration.svg" alt="Data visualization illustration" onerror="this.src='/static/images/chart-illustration.png'; this.onerror=null;">
-      </div>
-    </section>
+    <main class="container">
+      <section class="hero-section">
+        <div class="hero-content">
+          <h2>Transform Your Documents into Dynamic Visualizations</h2>
+          <p>
+            BioTree helps you convert PDF, DOCX, and TXT files into beautiful,
+            interactive charts and visualizations.
+          </p>
+          <a href="/upload-page" class="cta-button">Get Started</a>
+        </div>
+        <div class="hero-image">
+          <img
+            src="/static/images/chart-illustration.svg"
+            alt="Data visualization illustration"
+            onerror="this.src='/static/images/chart-illustration.png'; this.onerror=null;"
+          />
+        </div>
+      </section>
 
-    <section class="features-section">
-      <h2>Key Features</h2>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon document-icon"></div>
-          <h3>Multiple Document Formats</h3>
-          <p>Upload PDF, DOCX, or TXT files and convert them into structured data.</p>
+      <section class="features-section">
+        <h2>Key Features</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon document-icon"></div>
+            <h3>Multiple Document Formats</h3>
+            <p>
+              Upload PDF, DOCX, or TXT files and convert them into structured
+              data.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon chart-icon"></div>
+            <h3>Versatile Visualizations</h3>
+            <p>
+              Generate line charts, bar charts, and pie charts from your
+              document data.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon download-icon"></div>
+            <h3>Export & Share</h3>
+            <p>
+              Download your visualizations as SVG files for use in presentations
+              or publications.
+            </p>
+          </div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon chart-icon"></div>
-          <h3>Versatile Visualizations</h3>
-          <p>Generate line charts, bar charts, and pie charts from your document data.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon download-icon"></div>
-          <h3>Export & Share</h3>
-          <p>Download your visualizations as SVG files for use in presentations or publications.</p>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="how-it-works">
-      <h2>How It Works</h2>
-      <div class="steps">
-        <div class="step">
-          <div class="step-number">1</div>
-          <h3>Upload</h3>
-          <p>Select and upload your document file</p>
+      <section class="how-it-works">
+        <h2>How It Works</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h3>Upload</h3>
+            <p>Select and upload your document file</p>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <h3>Process</h3>
+            <p>Our system extracts and structures the data</p>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <h3>Visualize</h3>
+            <p>Choose your preferred chart type and customize</p>
+          </div>
         </div>
-        <div class="step">
-          <div class="step-number">2</div>
-          <h3>Process</h3>
-          <p>Our system extracts and structures the data</p>
+        <div class="cta-container">
+          <a href="/upload-page" class="cta-button">Try It Now</a>
         </div>
-        <div class="step">
-          <div class="step-number">3</div>
-          <h3>Visualize</h3>
-          <p>Choose your preferred chart type and customize</p>
-        </div>
-      </div>
-      <div class="cta-container">
-        <a href="/upload" class="cta-button">Try It Now</a>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
 
-  <!-- <footer class="site-footer">
+    <!-- <footer class="site-footer">
     <div class="container">
       <p>&copy; 2023 BioTree. All rights reserved.</p>
     </div>
   </footer> -->
 
-  <script src="/static/js/home.js"></script>
-</body>
+    <script src="/static/js/home.js"></script>
+  </body>
 </html>
