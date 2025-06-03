@@ -23,52 +23,51 @@
     </header>
 
     <main class="container">
-      <h2 class="page-title">Upload Document</h2>
+      <div class="page-layout">
+        <!-- Left side: Upload section -->
+        <div class="main-content">
+          <h2 class="page-title">Upload Document</h2>
+          
+          <section class="upload-section">
+            <h3>Select File</h3>
+            <div class="upload-area" id="dropArea">
+              <label for="document-upload" style="color: #3498db;">Choose a file or drag it here</label>
+              <input 
+                type="file" 
+                id="document-upload" 
+                name="document-upload" 
+                accept=".pdf,.docx,.txt"
+              >
+              <p class="file-types">Supported formats: PDF, DOCX, TXT</p>
+            </div>
+            
+            <div class="file-preview" id="filePreview">
+              <p>No file currently selected for upload</p>
+            </div>
+          </section>
 
-      <section class="upload-section">
-        <h3>Select File</h3>
-        <div class="upload-area" id="dropArea">
-          <label for="document-upload" style="color: #3498db"
-            >Choose a file or drag it here</label
-          >
-          <input
-            type="file"
-            id="document-upload"
-            name="document-upload"
-            accept=".pdf,.docx,.txt"
-          />
-          <p class="file-types">Supported formats: PDF, DOCX, TXT</p>
+          <button type="button" id="processBtn" disabled>Process Document</button>
+
+          <section class="controls-container" id="controls-container" style="display: none;"></section>
         </div>
-
-        <div class="file-preview" id="filePreview">
-          <p>No file currently selected for upload</p>
-        </div>
-      </section>
-
-      <button type="button" id="processBtn" disabled>Process Document</button>
-
-      <section
-        class="controls-container"
-        id="controls-container"
-        style="display: none"
-      ></section>
-
-      <!-- New User Documents Section -->
-      <section class="user-documents-section" id="user-documents-section">
-        <h3>My Documents</h3>
-        <div class="documents-list" id="documents-list">
-          <p class="loading-message">Loading your documents...</p>
-        </div>
-
-        <!-- Document Content Modal -->
-        <div class="modal" id="document-content-modal">
-          <div class="modal-content">
-            <span class="close-button" id="close-modal">&times;</span>
-            <h4 id="modal-title">Document Content</h4>
-            <div class="document-content" id="document-content"></div>
+        
+        <!-- Right side: Documents sidebar -->
+        <aside class="documents-sidebar">
+          <h3>My Documents</h3>
+          <div class="documents-list" id="documents-list">
+            <p class="loading-message">Loading your documents...</p>
           </div>
+        </aside>
+      </div>
+      
+      <!-- Document Content Modal -->
+      <div class="modal" id="document-content-modal">
+        <div class="modal-content">
+          <span class="close-button" id="close-modal">&times;</span>
+          <h4 id="modal-title">Document Content</h4>
+          <div class="document-content" id="document-content"></div>
         </div>
-      </section>
+      </div>
     </main>
 
     <!-- <footer class="site-footer">
