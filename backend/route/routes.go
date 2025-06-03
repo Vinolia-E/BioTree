@@ -12,17 +12,32 @@ func InitRoutes() *http.ServeMux {
 	fs := http.FileServer(http.Dir("frontend/static"))
 	r.Handle("/static/", http.StripPrefix("/static/", fs))
 
+	// Serve the home page
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "frontend/templates/index.html")
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		http.ServeFile(w, r, "frontend/templates/home.html")
 	})
 
-	r.HandleFunc("/upload", handler.ProcessAndGenerateHandler)
+	// Serve the upload page
+	r.HandleFunc("/upload-page", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "frontend/templates/upload-page.html")
+	})
 
-	// SVG chart generation endpoints
+	// API endpoints
 	r.HandleFunc("/api/generate-chart", handler.GenerateChartHandler)
 	r.HandleFunc("/api/data-files", handler.ListDataFilesHandler)
 	r.HandleFunc("/api/process-and-generate", handler.ProcessAndGenerateHandler)
 	r.HandleFunc("/generate-chart", handler.GenerateChartHandler)
+	// r.HandleFunc("/upload", handler.UploadHandler)
+	r.HandleFunc("/upload", handler.ProcessAndGenerateHandler)
+
+	// Serve the about page
+	r.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "frontend/templates/about.html")
+	})
 
 	return r
 }
