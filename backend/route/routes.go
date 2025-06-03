@@ -22,20 +22,21 @@ func InitRoutes() *http.ServeMux {
 	})
 
 	// Serve the upload page
-	r.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "frontend/templates/upload.html")
+	r.HandleFunc("/upload-page", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "frontend/templates/upload-page.html")
 	})
+
+	// API endpoints
+	r.HandleFunc("/upload", handler.UploadHandler)
+	r.HandleFunc("/generate-chart", handler.GenerateChartHandler)
+	r.HandleFunc("/api/data-files", handler.ListDataFilesHandler)
+	r.HandleFunc("/api/generate-chart", handler.GenerateChartHandler)
+	r.HandleFunc("/api/process-and-generate", handler.ProcessAndGenerateHandler)
 
 	// Serve the about page
 	r.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "frontend/templates/about.html")
 	})
-
-	// API endpoints
-	r.HandleFunc("/api/generate-chart", handler.GenerateChartHandler)
-	r.HandleFunc("/api/data-files", handler.ListDataFilesHandler)
-	r.HandleFunc("/api/process-and-generate", handler.ProcessAndGenerateHandler)
-	r.HandleFunc("/generate-chart", handler.GenerateChartHandler)
 
 	return r
 }
