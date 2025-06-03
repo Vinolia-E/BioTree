@@ -4,16 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BioTree</title>
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/frontend/static/css/style.css">
 </head>
 <body>
+  <header class="site-header">
+    <div class="container header-container">
+      <div class="logo">
+        <a href="/"><h1>BioTree</h1></a>
+      </div>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/upload" class="active">Upload</a></li>
+          <li><a href="/about">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
   <main class="container">
-    <h1>BioTree</h1>
+    <h2 class="page-title">Upload Document</h2>
     
     <section class="upload-section">
-      <h2>Upload Document</h2>
+      <h3>Select File</h3>
       <div class="upload-area" id="dropArea">
-        <label for="document-upload">Choose a file or drag it here</label>
+        <label for="document-upload" style="color: #3498db;">Choose a file or drag it here</label>
         <input 
           type="file" 
           id="document-upload" 
@@ -33,7 +48,7 @@
     <section class="controls-container" id="controls-container" style="display: none;"></section>
     
     <section class="visualization-section" style="display: none">
-      <h2>Select Visualization Type</h2>
+      <h3>Select Visualization Type</h3>
       <div class="visualization-options">
         <div class="viz-option">
           <input type="radio" id="line-chart" name="chart-type" value="line" checked>
@@ -56,7 +71,13 @@
     
   </main>
 
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2023 BioTree. All rights reserved.</p>
+    </div>
+  </footer>
+
   <!-- Use type="module" and point to your entry JS -->
-  <script type="module" src="/static/js/main.js"></script>
+  <script type="module" src="/frontend/static/js/main.js"></script>
 </body>
 </html>
