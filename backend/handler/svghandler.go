@@ -47,12 +47,12 @@ var (
 
 // ChartRequest represents the request payload for chart generation
 type ChartRequest struct {
-	DataFile  string `json:"data_file"`
+	DataFile  string `json:"dataFile"`
 	Unit      string `json:"unit,omitempty"`
-	ChartType string `json:"chart_type"`
+	ChartType string `json:"chartType"`
 	Title     string `json:"title,omitempty"`
-	XLabel    string `json:"x_label,omitempty"`
-	YLabel    string `json:"y_label,omitempty"`
+	XLabel    string `json:"xLabel,omitempty"`
+	YLabel    string `json:"yLabel,omitempty"`
 	Width     int    `json:"width,omitempty"`
 	Height    int    `json:"height,omitempty"`
 }
@@ -118,8 +118,10 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate required fields
+	log.Printf("Received chart request: %+v", req)
+
 	if req.DataFile == "" {
+		log.Printf("Missing data_file in request: %+v", req)
 		util.RespondError(w, "data_file is required")
 		return
 	}
@@ -281,58 +283,6 @@ func GenerateChartHandler(w http.ResponseWriter, r *http.Request) {
 		"data_count": len(dataPoints),
 		"cached":     false,
 	})
-}
-
-// ListDataFilesHandler returns a list of available processed data files
-func ListDataFilesHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-	// Read the data directory
-	files, err := os.ReadDir("data")
-	if err != nil {
-		log.Println("Failed to read data directory:", err)
-		util.RespondError(w, "Failed to read data directory")
-		return
-	}
-
-	var dataFiles []map[string]interface{}
-	for _, file := range files {
-		if file.IsDir() || filepath.Ext(file.Name()) != ".json" {
-			continue
-		}
-
-		info, err := file.Info()
-		if err != nil {
-			continue
-		}
-
-		// Get units for this file
-		filePath := filepath.Join("data", file.Name())
-		units, err := util.GetUnitsFromFile(filePath)
-		if err != nil {
-			log.Printf("Failed to get units from file %s: %v", file.Name(), err)
-			units = []string{} // Empty slice if can't read units
-		}
-
-		dataFiles = append(dataFiles, map[string]interface{}{
-			"name":     file.Name(),
-			"size":     info.Size(),
-			"modified": info.ModTime().Format("2006-01-02 15:04:05"),
-			"units":    units,
-		})
-	}
-
-	response := map[string]interface{}{
-		"status": "ok",
-		"files":  dataFiles,
-	}
-
-	json.NewEncoder(w).Encode(response)
 }
 
 // responseWithCompression writes a JSON response with optional gzip compression

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BioTree</title>
+    <title>BioTree - Upload</title>
     <link rel="stylesheet" href="/static/css/style.css" />
   </head>
   <body>
@@ -23,72 +23,59 @@
     </header>
 
     <main class="container">
-      <h2 class="page-title">Upload Document</h2>
+      <div class="page-layout">
+        <!-- Left side: Upload section -->
+        <div class="main-content">
+          <h2 class="page-title">Upload Document</h2>
+          
+          <section class="upload-section">
+            <h3>Select File</h3>
+            <div class="upload-area" id="dropArea">
+              <label for="document-upload" style="color: #3498db;">Choose a file or drag it here</label>
+              <input 
+                type="file" 
+                id="document-upload" 
+                name="document-upload" 
+                accept=".pdf,.docx,.txt"
+              >
+              <p class="file-types">Supported formats: PDF, DOCX, TXT</p>
+            </div>
+            
+            <div class="file-preview" id="filePreview">
+              <p>No file currently selected for upload</p>
+            </div>
+          </section>
 
-      <section class="upload-section">
-        <h3>Select File</h3>
-        <div class="upload-area" id="dropArea">
-          <label for="document-upload" style="color: #3498db"
-            >Choose a file or drag it here</label
-          >
-          <input
-            type="file"
-            id="document-upload"
-            name="document-upload"
-            accept=".pdf,.docx,.txt"
-          />
-          <p class="file-types">Supported formats: PDF, DOCX, TXT</p>
+          <button type="button" id="processBtn" disabled>Process Document</button>
+
+          <section class="controls-container" id="controls-container" style="display: none;"></section>
         </div>
-
-        <div class="file-preview" id="filePreview">
-          <p>No file currently selected for upload</p>
-        </div>
-      </section>
-
-      <button type="button" id="processBtn" disabled>Process Document</button>
-
-      <section
-        class="controls-container"
-        id="controls-container"
-        style="display: none"
-      ></section>
-
-      <section class="visualization-section" style="display: none">
-        <h3>Select Visualization Type</h3>
-        <div class="visualization-options">
-          <div class="viz-option">
-            <input
-              type="radio"
-              id="line-chart"
-              name="chart-type"
-              value="line"
-              checked
-            />
-            <label for="line-chart">Line Chart</label>
+        
+        <!-- Right side: Documents sidebar -->
+        <aside class="documents-sidebar">
+          <h3>My Documents</h3>
+          <div class="documents-list" id="documents-list">
+            <p class="loading-message">Loading your documents...</p>
           </div>
-          <div class="viz-option">
-            <input type="radio" id="bar-chart" name="chart-type" value="bar" />
-            <label for="bar-chart">Bar Chart</label>
-          </div>
-          <div class="viz-option">
-            <input type="radio" id="pie-chart" name="chart-type" value="pie" />
-            <label for="pie-chart">Pie Chart</label>
-          </div>
+        </aside>
+      </div>
+      
+      <!-- Document Content Modal -->
+      <div class="modal" id="document-content-modal">
+        <div class="modal-content">
+          <span class="close-button" id="close-modal">&times;</span>
+          <h4 id="modal-title">Document Content</h4>
+          <div class="document-content" id="document-content"></div>
         </div>
-
-        <div class="chart-preview" id="chartPreview">
-          <p>Chart preview will appear here after file upload</p>
-        </div>
-      </section>
+      </div>
     </main>
 
     <!-- <footer class="site-footer">
-    <div class="container">
-      <p>&copy; 2023 BioTree. All rights reserved.</p>
-    </div>
-  </footer> -->
+      <div class="container">
+        <p>&copy; 2023 BioTree. All rights reserved.</p>
+      </div>
+    </footer> -->
 
-    <!-- Use type="module" and point to your entry JS -->
     <script type="module" src="/static/js/main.js"></script>
   </body>
 </html>
